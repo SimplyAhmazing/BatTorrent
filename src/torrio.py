@@ -6,12 +6,29 @@ import aiohttp
 import bencoder
 import hashlib
 import ipaddress
+import logging
 import random
+import socket
 import string
-from urllib import parse as urlparse
 import struct
+from urllib import parse as urlparse
+import warnings
 
 import yarl
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(levelname)7s: %(message)s',
+    stream=sys.stderr,
+)
+LOG = logging.getLogger('')
+
+PEER_ID = 'SA' + ''.join(
+    random.choice(string.ascii_lowercase + string.digits)
+    for i in range(18)
+) # 'SimplyAhmazingPython'.encode('utf-8')
+PEER_ID_HASH = hashlib.sha1(PEER_ID.encode()).digest()
+CHUNK_SIZE = 10 * 1024
 
 
 class Torrent(object):
@@ -63,14 +80,8 @@ class Tracker(object):
         async with aiohttp.ClientSession() as session:
             resp = await session.get(self._get_tracker_url())
             resp = await resp.read()
+            print('Response is', resp)
             return bencoder.decode(resp)
-
-    def get_peer_id(self):
-        return hashlib.sha1(
-            ('SA' + ''.join(
-                [random.choice(string.digits) for i in range(18)])
-             ).encode('utf-8')
-        ).digest()
 
     def _get_tracker_url(self):
         return yarl.URL(self.tracker_url).with_query(self._get_request_params())
@@ -78,7 +89,7 @@ class Tracker(object):
     def _get_request_params(self):
         return {
             'info_hash': urlparse.quote(self.torrent.info_hash),
-            'peer_id': urlparse.quote(self.get_peer_id()),
+            'peer_id': urlparse.quote(PEER_ID),
             'compact': 1,
             'no_peer_id': 0,
             'event': 'started',
@@ -89,11 +100,14 @@ class Tracker(object):
         }
 
     def parse_peers(self, peers : bytes):
+        self_addr = socket.gethostbyname(socket.gethostname())
         def handle_bytes(peers_data):
             peers = []
             for i in range(0, len(peers_data), 6):
                 addr_bytes, port_bytes = peers_data[i:i + 4], peers_data[i + 4:i + 6]
                 ip_addr = str(ipaddress.IPv4Address(addr_bytes))
+                if ip_addr == self_addr:
+                    continue
                 port_bytes = struct.unpack('>H', port_bytes)[0]
                 peers.append((ip_addr, port_bytes))
             return peers
@@ -109,15 +123,86 @@ class Tracker(object):
 
 
 class Peer(object):
-    def __init__(self, connection_info):
-        self.connection_addr = '{}.{}'.format(*connection_info)
+    def __init__(self, torrent, host, port):
+        self.host = host
+        self.port = port
+        self.torrent = torrent
 
-    async def download():
+    def handshake(self):
+        # return b''.join([
+        #     chr(19).encode(),
+        #     b'BitTorrent protocol',
+        #     b'\x00\x00\x00\x00\x00\x10\x00\x05',
+        #     self.torrent.info_hash,
+        #     PEER_ID.encode()
+        # ])
+        format = '>B19s8x20s20s'
+        return struct.pack(
+            format,
+            19,
+            b'BitTorrent protocol',
+            self.torrent.info_hash,
+            PEER_ID.encode()
+        )
+
+    async def download(self):
+        reader, writer = await asyncio.wait_for(
+            asyncio.open_connection(self.host, self.port),
+            timeout=3
+        )
+
+        LOG.info('{} Sending handshake'.format(self))
+        writer.write(self.handshake())
+        await writer.drain()
+
+        handshake = await reader.read(68)  # Suspends here if there's nothing to be read
+
+        buf = b''
         while True:
-            print('downloading from ..')
+            resp = await reader.read(CHUNK_SIZE)  # Suspends here if there's nothing to be read
+            LOG.info('{} Read from peer: {}'.format(self, resp))
+
+            buf += resp
+
+            LOG.info('Buffer len({}) is {}'.format(len(buf), buf))
+
+            while True:
+                if len(buf) < 4:
+                    await asyncio.sleep(0.01)
+                    break
+
+                msg_len = buf[0:4]
+                length = struct.unpack('>I', msg_len)[0]
+
+                if len(buf[4:]) < length:
+                    break
+
+                if length == 0:
+                    LOG.info('got keep alive..')
+                    buf = buf[4:]
+                    continue
+
+                msg_id = buf[4] # 5th byte is the ID
+
+                if msg_id == 1:
+                    buf = buf[5:]
+                    LOG.info('got CHOKE')
+                    continue
+                elif msg_id == 5:
+                    bitfield = buf[5: 5 + length - 1]
+                    LOG.info('got bitfield {}'.format(bitfield))
+                    buf = buf[5+length-1:]
+                    continue
+                else:
+                    LOG.info('unknown ID {}'.format(msg_id))
+                    break
 
 
-async def download(torrent_file : str, download_location : str):
+    def __repr__(self):
+        return '[Peer {}:{}]'.format(self.host, self.port)
+
+
+async def download(torrent_file : str, download_location : str, loop=None):
     # Parse torrent file
     torrent = Torrent(torrent_file)
     print(torrent)
@@ -125,14 +210,37 @@ async def download(torrent_file : str, download_location : str):
     # Instantiate tracker object
     tracker = Tracker(torrent)
 
-    peers = await tracker.get_peers()
+    peers_info = await tracker.get_peers()
 
-    while not torrent.is_download_complete():
-        for peer in peers:
-            print(peer)
-            await asyncio.sleep(1)
+    # while not torrent.is_download_complete():
+    seen_peers = set()
+    peers = [
+        Peer(torrent, host, port)
+        for host, port in peers_info
+    ]
+    seen_peers.update([str(p) for p in peers])
+
+    print(seen_peers)
+
+    # async def ping():
+    #     while True:
+    #         await asyncio.sleep(1)
+    #         print('alive..')
+    #
+    # asyncio.ensure_future(ping())
+
+    await (
+        asyncio.gather(*[
+            peer.download()
+            for peer in peers
+        ])
+    )
 
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(download(sys.argv[1], '.'))
+    # loop.set_debug(True)
+    # loop.slow_callback_duration = 0.001
+    # warnings.simplefilter('always', ResourceWarning)
+
+    loop.run_until_complete(download(sys.argv[1], '.', loop=loop))
