@@ -1,145 +1,22 @@
-import sys
-from pprint import pformat, pprint as pp
-
 import asyncio
-import aiohttp
-import bencoder
-import copy
-import collections
-import hashlib
-import ipaddress
 import logging
 import math
-import socket
-import string
 import struct
-import random
-from urllib import parse as urlparse
+import sys
+from pprint import pformat
 
-import yarl
+from torrent import Torrent
+from tracker import Tracker
+from util import LOG, PEER_ID, REQUEST_SIZE
 
 logging.basicConfig(
     level=logging.INFO,
     format='%(levelname)7s: %(message)s',
     stream=sys.stderr,
 )
-LOG = logging.getLogger('')
+
 
 # PEER_ID = 'SimplyAhmazingPython'
-PEER_ID = 'SA' + ''.join(
-    random.choice(string.ascii_lowercase + string.digits)
-    for i in range(18)
-)
-PEER_ID_HASH = hashlib.sha1(PEER_ID.encode()).digest()
-REQUEST_SIZE = 2**14  # 10 * 1024
-
-
-class Torrent(object):
-    def __init__(self, path : str):
-        self.path = path
-        self.info = self.read_torrent_file(path)
-
-    def __getitem__(self, item):
-        return self.info[item]
-
-    @property
-    def announce_url(self) -> str:
-        return self.info[b'announce'].decode('utf-8')
-
-    @property
-    def info_hash(self):
-        return hashlib.sha1(
-            bencoder.encode(self.info[b'info'])
-        ).digest()
-
-    @property
-    def size(self):
-        info = self.info[b'info']
-        if b'length' in info:
-            return int(info[b'length'])
-        else:
-            return sum([int(f[b'length']) for f in info[b'files']])
-
-    def read_torrent_file(self, path : str) -> dict:
-        with open(path, 'rb') as f:
-            return bencoder.decode(f.read())
-
-    def is_download_complete(self):
-        return False
-
-    def __str__(self):
-        info = copy.deepcopy(self.info)
-        del info[b'info'][b'pieces']
-        return pformat(info)
-
-
-class Tracker(object):
-    def __init__(self, torrent : Torrent):
-        self.torrent = torrent
-        self.tracker_url = torrent.announce_url
-        self.peers = []
-
-    async def get_peers(self):
-        peers_resp = await self.request_peers()
-        peers = self.parse_peers(peers_resp[b'peers'])
-        return peers
-
-    async def request_peers(self):
-        async with aiohttp.ClientSession() as session:
-            resp = await session.get(self._get_tracker_url())
-            resp = await resp.read()
-            LOG.info('Tracker response: {}'.format(resp))
-            peers = None
-            try:
-                peers = bencoder.decode(resp)
-            except AssertionError:
-                LOG.error('Failed to decode Tracker response: {}'.format(resp))
-                LOG.error('Tracker request URL: {}'.format(self._get_tracker_url()))
-                raise RuntimeError('Failed to get Peers from Tracker')
-            return peers
-
-    def _get_tracker_url(self):
-        return yarl.URL(self.tracker_url).with_query(self._get_request_params())
-
-    def _get_request_params(self):
-        return {
-            'info_hash': urlparse.quote(self.torrent.info_hash),
-            'peer_id': urlparse.quote(PEER_ID),
-            'compact': 1,
-            'no_peer_id': 0,
-            'event': 'started',
-            'port': 59696,
-            'uploaded': 0,
-            'downloaded': 0,
-            'left': self.torrent.size
-        }
-
-    def parse_peers(self, peers : bytes):
-        self_addr = socket.gethostbyname(socket.gethostname())
-        self_addr = '192.168.99.1'
-        LOG.info('Self addr is: {}'.format(self_addr))
-        def handle_bytes(peers_data):
-            peers = []
-            for i in range(0, len(peers_data), 6):
-                addr_bytes, port_bytes = (
-                    peers_data[i:i + 4], peers_data[i + 4:i + 6]
-                )
-                ip_addr = str(ipaddress.IPv4Address(addr_bytes))
-                if ip_addr == self_addr:
-                    print('skipping', ip_addr)
-                    continue
-                port_bytes = struct.unpack('>H', port_bytes)[0]
-                peers.append((ip_addr, port_bytes))
-            return peers
-
-        def handle_dict(peers):
-            raise NotImplementedError
-
-        handlers = {
-            bytes: handle_bytes,
-            dict: handle_dict
-        }
-        return handlers[type(peers)](peers)
 
 
 class Piece(object):
