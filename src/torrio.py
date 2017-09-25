@@ -4,12 +4,12 @@ from pprint import pformat, pprint as pp
 import asyncio
 import aiohttp
 import bencoder
+import collections
 import hashlib
 import ipaddress
 import logging
-import random
+import math
 import socket
-import string
 import struct
 from urllib import parse as urlparse
 
@@ -24,13 +24,16 @@ LOG = logging.getLogger('')
 
 PEER_ID = 'SimplyAhmazingPython'
 PEER_ID_HASH = hashlib.sha1(PEER_ID.encode()).digest()
-CHUNK_SIZE = 10 * 1024
+REQUEST_SIZE = 2**14  # 10 * 1024
 
 
 class Torrent(object):
     def __init__(self, path : str):
         self.path = path
         self.info = self.read_torrent_file(path)
+
+    def __getitem__(self, item):
+        return self.info[item]
 
     @property
     def announce_url(self) -> str:
@@ -123,6 +126,58 @@ class Tracker(object):
         return handlers[type(peers)](peers)
 
 
+class Piece(object):
+    def __init__(self, index, blocks, _hash):
+        self.index = index
+        self.blocks = blocks
+        self.hash = _hash
+
+    def __repr__(self):
+        return '<Piece: {} Blocks: {}>'.format(self.index, len(self.blocks))
+
+
+class Block(object):
+    def __init__(self, piece, begin, length):
+        self.piece = piece
+        self.begin = begin
+        self.length = length
+
+
+class DownloadSession(object):
+    def __init__(self, torrent : Torrent):
+        self.torrent = torrent
+        self.piece_size = self.torrent[b'info'][b'piece length']
+        self.number_of_pieces = math.ceil(self.torrent[b'info'][b'length'] / self.piece_size)
+        self.pieces = self.get_pieces()
+
+    def get_pieces(self):
+        pieces = []
+        for piece_idx in range(self.number_of_pieces):
+            blocks = []
+            piece_begin = self.piece_size * piece_idx
+            num_blocks = math.ceil(self.piece_size / REQUEST_SIZE)
+            for block_idx in range(num_blocks):
+                is_last_block = (num_blocks - 1) == block_idx
+                block_length = (
+                    (self.piece_size % REQUEST_SIZE)
+                    if is_last_block
+                    else REQUEST_SIZE
+                )
+                blocks.append(
+                    Block(block_idx, piece_begin + block_length * block_idx, block_length)
+                )
+            pieces.append(Piece(piece_idx, blocks, None))
+        return pieces
+
+    def __repr__(self):
+        data = {
+            'number of pieces': self.number_of_pieces,
+            'piece size': self.piece_size,
+            'pieces': self.pieces[:5]
+        }
+        return pformat(data)
+
+
 class Peer(object):
     def __init__(self, torrent, host, port):
         self.host = host
@@ -173,7 +228,7 @@ class Peer(object):
 
         buf = b''
         while True:
-            resp = await reader.read(CHUNK_SIZE)  # Suspends here if there's nothing to be read
+            resp = await reader.read(REQUEST_SIZE)  # Suspends here if there's nothing to be read
             LOG.info('{} Read from peer: {}'.format(self, resp))
 
             buf += resp
@@ -257,14 +312,8 @@ async def download(torrent_file : str, download_location : str, loop=None):
     ]
     seen_peers.update([str(p) for p in peers])
 
-    print(seen_peers)
+    LOG.info('[Peers] {}'.format(seen_peers))
 
-    # async def ping():
-    #     while True:
-    #         await asyncio.sleep(1)
-    #         print('alive..')
-    #
-    # asyncio.ensure_future(ping())
 
     await (
         asyncio.gather(*[
