@@ -48,11 +48,11 @@ class DownloadSession(object):
 
     def get_pieces(self):
         pieces = []
+        blocks_per_piece = math.ceil(self.piece_size / REQUEST_SIZE)
         for piece_idx in range(self.number_of_pieces):
             blocks = []
-            num_blocks = math.ceil(self.piece_size / REQUEST_SIZE)
-            for block_idx in range(num_blocks):
-                is_last_block = (num_blocks - 1) == block_idx
+            for block_idx in range(blocks_per_piece):
+                is_last_block = (blocks_per_piece - 1) == block_idx
                 block_length = (
                     (self.piece_size % REQUEST_SIZE) or REQUEST_SIZE
                     if is_last_block
@@ -74,7 +74,20 @@ class DownloadSession(object):
                 return piece
         raise Exception('Not eligible for valid pieces')
 
-    def on_block_downloaded(self):
+    def handle_block_downloaded(self, block):
+        # Send block to writer
+        self.os_writer.put_nowait(block)
+
+    def handle_piece_downloaded(self):
+        """
+        TODO: implement writing off downloaded piece
+        1. Removes piece from self.pieces
+        2. Verifies piece hash
+        3. Sets self.have_pieces[piece.index] = True if hash is valid
+        4. Else re-inserts piece into self.pieces
+
+        :return:  None
+        """
         pass
 
     def __repr__(self):
