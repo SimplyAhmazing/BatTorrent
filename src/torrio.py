@@ -149,6 +149,8 @@ class DownloadSession(object):
         self.piece_size = self.torrent[b'info'][b'piece length']
         self.number_of_pieces = math.ceil(self.torrent[b'info'][b'length'] / self.piece_size)
         self.pieces = self.get_pieces()
+        self.request_pieces = []
+        self.received_pieces = []
 
     def get_pieces(self):
         pieces = []
@@ -179,34 +181,29 @@ class DownloadSession(object):
 
 
 class Peer(object):
-    def __init__(self, torrent, host, port):
+    def __init__(self, torrent_session, host, port):
         self.host = host
         self.port = port
-        self.torrent = torrent
+        self.torrent_session = torrent_session
+        # TODO: track pieces a peer has
 
     def handshake(self):
-        # return b''.join([
-        #     chr(19).encode(),
-        #     b'BitTorrent protocol',
-        #     b'\x00\x00\x00\x00\x00\x10\x00\x05',
-        #     self.torrent.info_hash,
-        #     PEER_ID.encode()
-        # ])
-        format = '>B19s8x20s20s'
         return struct.pack(
-            format,
+            '>B19s8x20s20s',
             19,
             b'BitTorrent protocol',
-            self.torrent.info_hash,
+            self.torrent_session.torrent.info_hash,
             PEER_ID.encode()
         )
 
     async def send_interested(self, writer):
+        # TODO: refactor into messages util
         msg = struct.pack('>Ib', 1, 2)
         writer.write(msg)
         await writer.drain()
 
     async def request_a_piece(self, writer):
+        # TODO: request a piece dynamically based on torrent (use torrent session)
         msg = struct.pack('>IbIII', 13, 6, 0, 0, 35)
         writer.write(msg)
         await writer.drain()
@@ -226,6 +223,7 @@ class Peer(object):
 
         await self.send_interested(writer)
 
+        # TODO: use async iterator
         buf = b''
         while True:
             resp = await reader.read(REQUEST_SIZE)  # Suspends here if there's nothing to be read
@@ -282,13 +280,13 @@ class Peer(object):
                     LOG.info('Got piece idx {} begin {}'.format(piece_index, piece_begin))
                     LOG.info('Got this piece: {}'.format(block))
 
-                    with open(self.torrent.info[b'info'][b'name'].decode(), 'wb') as f:
-                        f.write(block)
+                    # TODO: delegate to torrent session
+                    # with open(self.torrent_session.torrent.info[b'info'][b'name'].decode(), 'wb') as f:
+                    #     f.write(block)
                     continue
                 else:
                     LOG.info('unknown ID {}'.format(msg_id))
                     break
-
 
     def __repr__(self):
         return '[Peer {}:{}]'.format(self.host, self.port)
