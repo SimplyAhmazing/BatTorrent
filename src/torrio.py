@@ -4,13 +4,16 @@ from pprint import pformat, pprint as pp
 import asyncio
 import aiohttp
 import bencoder
+import copy
 import collections
 import hashlib
 import ipaddress
 import logging
 import math
 import socket
+import string
 import struct
+import random
 from urllib import parse as urlparse
 
 import yarl
@@ -22,7 +25,11 @@ logging.basicConfig(
 )
 LOG = logging.getLogger('')
 
-PEER_ID = 'SimplyAhmazingPython'
+# PEER_ID = 'SimplyAhmazingPython'
+PEER_ID = 'SA' + ''.join(
+    random.choice(string.ascii_lowercase + string.digits)
+    for i in range(18)
+)
 PEER_ID_HASH = hashlib.sha1(PEER_ID.encode()).digest()
 REQUEST_SIZE = 2**14  # 10 * 1024
 
@@ -61,7 +68,9 @@ class Torrent(object):
         return False
 
     def __str__(self):
-        return pformat(self.info)
+        info = copy.deepcopy(self.info)
+        del info[b'info'][b'pieces']
+        return pformat(info)
 
 
 class Tracker(object):
@@ -79,8 +88,15 @@ class Tracker(object):
         async with aiohttp.ClientSession() as session:
             resp = await session.get(self._get_tracker_url())
             resp = await resp.read()
-            print('Response is', resp)
-            return bencoder.decode(resp)
+            LOG.info('Tracker response: {}'.format(resp))
+            peers = None
+            try:
+                peers = bencoder.decode(resp)
+            except AssertionError:
+                LOG.error('Failed to decode Tracker response: {}'.format(resp))
+                LOG.error('Tracker request URL: {}'.format(self._get_tracker_url()))
+                raise RuntimeError('Failed to get Peers from Tracker')
+            return peers
 
     def _get_tracker_url(self):
         return yarl.URL(self.tracker_url).with_query(self._get_request_params())
@@ -295,6 +311,8 @@ class Peer(object):
 async def download(torrent_file : str, download_location : str, loop=None):
     # Parse torrent file
     torrent = Torrent(torrent_file)
+    session = DownloadSession(torrent)
+
     print(torrent)
 
     # Instantiate tracker object
@@ -305,13 +323,12 @@ async def download(torrent_file : str, download_location : str, loop=None):
     # while not torrent.is_download_complete():
     seen_peers = set()
     peers = [
-        Peer(torrent, host, port)
+        Peer(session, host, port)
         for host, port in peers_info
     ]
     seen_peers.update([str(p) for p in peers])
 
     LOG.info('[Peers] {}'.format(seen_peers))
-
 
     await (
         asyncio.gather(*[
