@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import math
+import os
 import sys
 from pprint import pformat
 
@@ -24,7 +25,10 @@ class Piece(object):
         self.hash = _hash
 
     def __repr__(self):
-        return '<Piece: {} Blocks: {}>'.format(self.index, len(self.blocks))
+        return '<Piece: {} Blocks: {}>'.format(
+            self.index,
+            len(self.blocks)
+        )
 
 
 class Block(object):
@@ -34,17 +38,22 @@ class Block(object):
         self.length = length
 
     def __repr__(self):
-        return '[Block ({}, {}, {})]'.format(self.piece, self.begin, self.length)
+        return '[Block ({}, {}, {})]'.format(
+            self.piece,
+            self.begin,
+            self.length
+        )
 
 
 class DownloadSession(object):
-    def __init__(self, torrent : Torrent):
+    def __init__(self, torrent : Torrent, received_blocks : asyncio.Queue = None):
         self.torrent = torrent
         self.piece_size = self.torrent[b'info'][b'piece length']
         self.number_of_pieces = math.ceil(self.torrent[b'info'][b'length'] / self.piece_size)
         self.pieces = self.get_pieces()
         self.pieces_in_progress = []
         self.received_pieces = []
+        self.received_blocks = received_blocks
 
     def get_pieces(self):
         pieces = []
@@ -59,7 +68,11 @@ class DownloadSession(object):
                     else REQUEST_SIZE
                 )
                 blocks.append(
-                    Block(block_idx, block_length * block_idx, block_length)
+                    Block(
+                        block_idx,
+                        block_length * block_idx,
+                        block_length
+                    )
                 )
             pieces.append(Piece(piece_idx, blocks, None))
         return pieces
@@ -69,14 +82,14 @@ class DownloadSession(object):
             # Don't create request out of pieces we already have
             if piece in self.received_pieces or piece in self.pieces_in_progress:
                 continue
+
             if have_pieces[piece.index]:
                 self.pieces_in_progress.append(piece)
                 return piece
         raise Exception('Not eligible for valid pieces')
 
     def handle_block_downloaded(self, block):
-        # Send block to writer
-        self.os_writer.put_nowait(block)
+        self.received_blocks.put_nowait(block)
 
     def handle_piece_downloaded(self):
         """
@@ -99,9 +112,40 @@ class DownloadSession(object):
         return pformat(data)
 
 
+class TorrentWriterTask(object):
+    def __init__(self, outdir, torrent):
+        self.file_name = self.get_file_path(outdir, torrent)
+        self.received_blocks_queue = asyncio.Queue()
+        asyncio.ensure_future(self.start())
+
+    def get_received_blocks_queue(self):
+        return self.received_blocks_queue
+
+    def get_file_path(self, outdir, torrent):
+        name = torrent[b'info'][b'name'].decode()
+        file_path = os.path.join(outdir, name)
+        if os.path.exists(file_path)
+            # TODO: add (num) to file name
+            LOG.info('Previous download exists')
+        return file_path
+
+    async def start(self):
+        while True:
+            block = await self.received_blocks_queue.get()
+            if not block:
+                LOG.info('Received poison pill.Exiting')
+
+            # TODO: Refactor into Thread
+            block_abs_location, block_data = block
+            with open(self.file_name, 'w+b') as f:
+                f.seek(block_abs_location)
+                f.write(block_data)
+
+
 async def download(torrent_file : str, download_location : str, loop=None):
     # Parse torrent file
     torrent = Torrent(torrent_file)
+    torrent_writer = TorrentWriterTask(download_location, torrent)
     session = DownloadSession(torrent)
 
     LOG.info('Torrent: {}'.format(torrent))
@@ -111,12 +155,11 @@ async def download(torrent_file : str, download_location : str, loop=None):
 
     peers_info = await tracker.get_peers()
 
-    # while not torrent.is_download_complete():
     seen_peers = set()
     peers = [
         Peer(session, host, port)
         for host, port in peers_info
-        ]
+    ]
     seen_peers.update([str(p) for p in peers])
 
     LOG.info('[Peers] {}'.format(seen_peers))
