@@ -27,11 +27,9 @@ class Tracker(object):
             resp = await session.get(self.tracker_url, params=self._get_request_params())
             resp_data = await resp.read()
             LOG.info('Tracker response: {}'.format(resp))
-            LOG.info('Tracker response data: {}'.format(resp_data))
             peers = None
             try:
                 peers = bencoder.decode(resp_data)
-                LOG.info('Tracker response data bdecoded: {}'.format(peers))
             except AssertionError:
                 LOG.error('Failed to decode Tracker response: {}'.format(resp_data))
                 LOG.error('Tracker request URL: {}'.format(str(resp.url).split('&')))

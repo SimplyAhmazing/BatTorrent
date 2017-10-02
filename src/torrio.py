@@ -124,7 +124,7 @@ class TorrentWriterTask(object):
     def get_file_path(self, outdir, torrent):
         name = torrent[b'info'][b'name'].decode()
         file_path = os.path.join(outdir, name)
-        if os.path.exists(file_path)
+        if os.path.exists(file_path):
             # TODO: add (num) to file name
             LOG.info('Previous download exists')
         return file_path

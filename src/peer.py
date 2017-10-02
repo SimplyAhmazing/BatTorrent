@@ -56,10 +56,14 @@ class Peer(object):
         await writer.drain()
 
     async def download(self):
-        reader, writer = await asyncio.wait_for(
-            asyncio.open_connection(self.host, self.port),
-            timeout=3
-        )
+        try:
+            reader, writer = await asyncio.wait_for(
+                asyncio.open_connection(self.host, self.port),
+                timeout=10
+            )
+        except ConnectionError:
+            LOG.error('Failed to connect to Peer {}'.format(self))
+            return
 
         LOG.info('{} Sending handshake'.format(self))
         writer.write(self.handshake())
