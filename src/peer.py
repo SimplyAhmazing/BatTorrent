@@ -89,7 +89,7 @@ class Peer(object):
 
             while True:
                 if len(buf) < 4:
-                    await asyncio.sleep(0.01)
+                    await asyncio.sleep(0)
                     break
 
                 msg_len = buf[0:4]
@@ -102,20 +102,26 @@ class Peer(object):
                     LOG.info('got keep alive..')
                     buf = buf[4:]
 
+                if len(buf) < 5:
+                    break
+
                 msg_id = buf[4] # 5th byte is the ID
 
                 if msg_id == 0:
                     buf = buf[5:]
                     LOG.info('got CHOKE')
+
                 elif msg_id == 1:
                     buf = buf[5:]
                     LOG.info('got UNCHOKE')
+
                 elif msg_id == 5:
                     bitfield = buf[5: 5 + length - 1]
                     self.have_pieces = bitstring.BitArray(bitfield)
                     LOG.info('got bitfield {}'.format(bitfield))
                     buf = buf[5+length-1:]
                     await self.send_interested(writer)
+
                 elif msg_id == 7:
                     piece_index = buf[5]
                     piece_begin = buf[6]
