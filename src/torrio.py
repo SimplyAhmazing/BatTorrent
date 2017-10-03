@@ -75,6 +75,8 @@ class DownloadSession(object):
                     )
                 )
             pieces.append(Piece(piece_idx, blocks, None))
+
+        import pdb; pdb.set_trace()
         return pieces
 
     def get_piece_request(self, have_pieces):

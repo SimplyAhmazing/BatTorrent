@@ -19,6 +19,8 @@ class Peer(object):
         self.piece_in_progress = None
         self.blocks = None
 
+        self.inflight_requests = 0
+
     def handshake(self):
         return struct.pack(
             '>B19s8x20s20s',
@@ -48,18 +50,21 @@ class Peer(object):
 
 
     async def request_a_piece(self, writer):
+        if self.inflight_requests > 1:
+            return
         blocks_generator = self.get_blocks_generator()
         block  = next(blocks_generator)
         LOG.info('[{}] Request Block: {}'.format(self, block))
         msg = struct.pack('>IbIII', 13, 6, block.piece, block.begin, block.length)
         writer.write(msg)
+        self.inflight_requests += 1
         await writer.drain()
 
     async def download(self):
         try:
             reader, writer = await asyncio.wait_for(
                 asyncio.open_connection(self.host, self.port),
-                timeout=10
+                timeout=30
             )
         except ConnectionError:
             LOG.error('Failed to connect to Peer {}'.format(self))
@@ -78,58 +83,110 @@ class Peer(object):
         buf = b''
         while True:
             resp = await reader.read(REQUEST_SIZE)  # Suspends here if there's nothing to be read
-            LOG.info('{} Read from peer: {}'.format(self, resp[:80]))
+            LOG.info('{} Read from peer: {}'.format(self, resp[:8]))
 
             buf += resp
 
-            LOG.info('Buffer len({}) is {}'.format(len(buf), buf[:80]))
+            LOG.info('Buffer len({}) is {}'.format(len(buf), buf[:8]))
 
             if not buf and not resp:
                 return
 
             while True:
                 if len(buf) < 4:
-                    await asyncio.sleep(0)
+                    LOG.info('Buffer is too short')
                     break
 
-                msg_len = buf[0:4]
-                length = struct.unpack('>I', msg_len)[0]
+                length = struct.unpack('>I', buf[0:4])[0]
 
-                if len(buf[4:]) < length:
+                if not len(buf) >= length:
                     break
+
+                def consume(buf):
+                    buf = buf[4 + length:]
+                    return buf
+
+                def get_data(buf):
+                    return buf[:4 + length]
+
 
                 if length == 0:
-                    LOG.info('got keep alive..')
-                    buf = buf[4:]
+                    LOG.info('[Message] Keep Alive')
+                    buf = consume(buf)
+                    data = get_data(buf)
+                    LOG.info('[DATA]', data)
+                    continue
 
                 if len(buf) < 5:
+                    LOG.info('Buffer is less than 5... breaking')
                     break
 
-                msg_id = buf[4] # 5th byte is the ID
+                msg_id = struct.unpack('>b', buf[4:5])[0] # 5th byte is the ID
 
                 if msg_id == 0:
-                    buf = buf[5:]
-                    LOG.info('got CHOKE')
+                    LOG.info('[Message] CHOKE')
+                    data = get_data(buf)
+                    buf = consume(buf)
+                    LOG.info('[DATA]', data)
 
                 elif msg_id == 1:
+                    data = get_data(buf)
+                    buf = consume(buf)
+                    LOG.info('[Message] UNCHOKE')
+                    self.peer_choke = False
+
+                elif msg_id == 2:
+                    data = get_data(buf)
+                    buf = consume(buf)
+                    LOG.info('[Message] Interested')
+                    pass
+
+                elif msg_id == 3:
+                    data = get_data(buf)
+                    buf = consume(buf)
+                    LOG.info('[Message] Not Interested')
+                    pass
+
+                elif msg_id == 4:
                     buf = buf[5:]
-                    LOG.info('got UNCHOKE')
+                    data = get_data(buf)
+                    buf = consume(buf)
+                    LOG.info('[Message] Have')
+                    pass
 
                 elif msg_id == 5:
                     bitfield = buf[5: 5 + length - 1]
                     self.have_pieces = bitstring.BitArray(bitfield)
-                    LOG.info('got bitfield {}'.format(bitfield))
-                    buf = buf[5+length-1:]
+                    LOG.info('[Message] Bitfield: {}'.format(bitfield))
+
+                    # buf = buf[5 + length - 1:]
+                    buf = buf[4 + length:]
                     await self.send_interested(writer)
 
                 elif msg_id == 7:
-                    piece_index = buf[5]
-                    piece_begin = buf[6]
-                    block = buf[13: 13 + length]
-                    buf = buf[13 + length:]
-                    LOG.info('Buffer is reduced to {}'.format(buf))
-                    LOG.info('Got piece idx {} begin {}'.format(piece_index, piece_begin))
-                    LOG.info('Block has len {}'.format(len(block)))
+                    self.inflight_requests -= 1
+                    data = get_data(buf)
+                    buf = consume(buf)
+
+                    l = struct.unpack('>I', data[:4])[0]
+                    try:
+                        parts = struct.unpack(
+                            '>IbII' + str(l - 9) + 's',
+                            data[:length + 4])
+                        piece, begin, ll = parts[2], parts[3], parts[4]
+                        LOG.info('Got piece idx {} begin {}'.format(piece, begin))
+                    except struct.error:
+                        LOG.info('error decoding piece')
+                        return None
+
+                    # piece_index = buf[5]
+                    # piece_begin = buf[6]
+                    # block = buf[13: 13 + length]
+                    # # buf = buf[13 + length:]
+                    # buf = buf[4 + length:]
+                    # LOG.info('Buffer is reduced to {}'.format(buf))
+                    # LOG.info('Got piece idx {} begin {}'.format(piece_index, piece_begin))
+                    # LOG.info('Block has len {}'.format(len(block)))
                     # LOG.info('Got this piece: {}'.format(block))
 
                     # TODO: delegate to torrent session
@@ -138,6 +195,8 @@ class Peer(object):
                     # continue
                 else:
                     LOG.info('unknown ID {}'.format(msg_id))
+                    if msg_id == 159:
+                        exit(1)
 
                 await self.request_a_piece(writer)
 
