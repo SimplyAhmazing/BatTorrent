@@ -44,13 +44,20 @@ def test_get_pieces(torrent):
     assert block_vals == p
 
 
-def test_get_piece_request(torrent):
+def test_get_piece_request_returns_all_requests(torrent):
     session = DownloadSession(torrent)
     pieces = session.get_pieces()
     have_pieces = bitstring.BitArray(bin='1'*len(pieces))
 
     piece_block_combos = get_piece_block_tuples(pieces)
 
-    req = session.get_piece_request(have_pieces)
+    all_requests = []
+    try:
+        for _ in range(len(piece_block_combos)):
+            all_requests.append(
+                session.get_piece_request(have_pieces)
+            )
+    except Exception:
+        pass
 
-    print(req)
+    assert piece_block_combos == get_piece_block_tuples(all_requests)
