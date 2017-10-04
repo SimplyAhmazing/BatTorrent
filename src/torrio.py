@@ -81,6 +81,7 @@ class Block(object):
         )
 
 
+# TODO: check if file isn't already downloaded
 class DownloadSession(object):
     def __init__(
             self, torrent : Torrent, received_blocks : asyncio.Queue = None):
@@ -161,9 +162,6 @@ class DownloadSession(object):
         Determines next piece for downloading. Expects BitArray
         of pieces a peer can request
         """
-
-        # TODO: check if file isn't already downloaded
-
         for piece in self.pieces:
             # Don't create request out of pieces we already have
             is_piece_downloaded = piece.index in self.received_pieces
@@ -224,3 +222,4 @@ if __name__ == '__main__':
     # loop.slow_callback_duration = 0.001
     # warnings.simplefilter('always', ResourceWarning)
     loop.run_until_complete(download(sys.argv[1], '.', loop=loop))
+    loop.close()
