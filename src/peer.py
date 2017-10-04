@@ -1,5 +1,6 @@
 import asyncio
 import struct
+from collections import defaultdict
 
 import bitstring
 
@@ -54,6 +55,8 @@ class Peer(object):
             return
         blocks_generator = self.get_blocks_generator()
         block  = next(blocks_generator)
+
+
         LOG.info('[{}] Request Block: {}'.format(self, block))
         msg = struct.pack('>IbIII', 13, 6, block.piece, block.begin, block.length)
         writer.write(msg)
@@ -61,10 +64,19 @@ class Peer(object):
         await writer.drain()
 
     async def download(self):
+        retries = 0
+        while retries < 5:
+            retries += 1
+            try:
+                await self._download()
+            except asyncio.TimeoutError:
+                LOG.warning('Timed out connecting with: {}'.format(self.host))
+
+    async def _download(self):
         try:
             reader, writer = await asyncio.wait_for(
                 asyncio.open_connection(self.host, self.port),
-                timeout=30
+                timeout=10
             )
         except ConnectionError:
             LOG.error('Failed to connect to Peer {}'.format(self))
@@ -83,18 +95,18 @@ class Peer(object):
         buf = b''
         while True:
             resp = await reader.read(REQUEST_SIZE)  # Suspends here if there's nothing to be read
-            LOG.info('{} Read from peer: {}'.format(self, resp[:8]))
+            # LOG.info('{} Read from peer: {}'.format(self, resp[:8]))
 
             buf += resp
 
-            LOG.info('Buffer len({}) is {}'.format(len(buf), buf[:8]))
+            #LOG.info('Buffer len({}) is {}'.format(len(buf), buf[:8]))
 
             if not buf and not resp:
                 return
 
             while True:
                 if len(buf) < 4:
-                    LOG.info('Buffer is too short')
+                    # LOG.info('Buffer is too short')
                     break
 
                 length = struct.unpack('>I', buf[0:4])[0]
@@ -173,8 +185,9 @@ class Peer(object):
                         parts = struct.unpack(
                             '>IbII' + str(l - 9) + 's',
                             data[:length + 4])
-                        piece, begin, ll = parts[2], parts[3], parts[4]
-                        LOG.info('Got piece idx {} begin {}'.format(piece, begin))
+                        piece_idx, begin, data = parts[2], parts[3], parts[4]
+                        self.torrent_session.on_block_received(piece_idx, begin, data)
+                        # LOG.info('Got piece idx {} begin {}'.format(piece, begin))
                     except struct.error:
                         LOG.info('error decoding piece')
                         return None

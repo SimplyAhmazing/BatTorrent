@@ -13,6 +13,9 @@ class Torrent(object):
     def __getitem__(self, item):
         return self.info[item]
 
+    def get_piece_hash(self, piece_idx):
+        return self.info[b'info'][b'pieces'][piece_idx*20: (piece_idx*20) + 20]
+
     @property
     def announce_url(self) -> str:
         return self.info[b'announce'].decode('utf-8')
@@ -34,9 +37,6 @@ class Torrent(object):
     def read_torrent_file(self, path : str) -> dict:
         with open(path, 'rb') as f:
             return bencoder.decode(f.read())
-
-    def is_download_complete(self):
-        return False
 
     def __str__(self):
         # info = copy.deepcopy(self.info)
