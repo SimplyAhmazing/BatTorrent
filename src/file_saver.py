@@ -31,7 +31,3 @@ class FileSaver(object):
             block_abs_location, block_data = block
             os.lseek(self.fd, block_abs_location, os.SEEK_SET)
             os.write(self.fd, block_data)
-            # with open(os.path.join(os.getcwd(), self.file_name), 'w+b') as f:
-            #     print('gopt here..')
-            #     f.seek(block_abs_location)
-            #     f.write(block_data)
