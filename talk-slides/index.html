@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+	<html class="sl-root decks export offline loaded">
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<title>Creating a Bittorrent Client with Asyncio: Slides</title>
+		<meta name="description" content="Slides">
+
+		<link rel="stylesheet" type="text/css" href="lib/offline-v2.css">
+
+
+
+	</head>
+	<body class="reveal-viewport theme-font-montserrat theme-color-white-blue">
+		<div class="reveal">
+			<div class="slides">
+				<section data-id="c97565cdc8290647a38da6bf8f509442"><div class="sl-block" data-block-type="text" style="width: 806px; left: 77px; top: 238px; height: auto;" data-block-id="bc4399e80d0d753ec1ab87a134500f1e"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;">
+<h1>Creating a Bittorrent Client with Asyncio</h1>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 600px; left: 180px; top: 504px;" data-block-id="9018785b2ba447eaedf41d3c9a4c6eb6"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 12;">
+<p>Ahmed Abdalla</p>
+</div></div></section><section data-id="8aee5a2a6f7514a92e91d9187a50c214"><div class="sl-block" data-block-type="text" style="width: 602px; left: 29px; top: 121px; height: auto;" data-block-id="764eefdb836f1b7b4240f35d9d7d0160"><div class="sl-block-content" data-placeholder-tag="h2" data-placeholder-text="Title Text" style="text-align: left; z-index: 10;">
+<h2>What is Bittorent?</h2>
+</div></div>
+<div class="sl-block" data-block-type="text" style="width: 779px; left: 34px; top: 269px; height: auto;" data-block-id="76e91e4c3c4dc151e546d1443cd4e224"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi nec metus justo. Aliquam erat volutpat." style="z-index: 12; text-align: left;">
+<ul>
+	<li>Open, peer to peer protocol for sharing files</li>
+	<li>Robust, distributed protocol</li>
+</ul>
+</div></div>
+</section><section data-id="c99e9e72a6693f1fca76e0d01435fbda"><div class="sl-block" data-block-type="text" style="width: 873px; left: 29px; top: 158px; height: auto;" data-block-id="082f16ccdf5e717214ac8a812c398121"><div class="sl-block-content" data-placeholder-tag="h2" data-placeholder-text="Title Text" style="text-align: left; z-index: 10;">
+<h2>Why build a Bittorrent Client?</h2>
+</div></div>
+<div class="sl-block" data-block-type="text" style="width: 413px; left: 29px; top: 232px; height: auto;" data-block-id="060129d7221d77e0900e0bc82638325e"><div class="sl-block-content fragment" data-placeholder-tag="p" data-placeholder-text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi nec metus justo. Aliquam erat volutpat." style="z-index: 12; text-align: left;" data-fragment-index="0">
+<p> </p>
+
+<p>...Why not?</p>
+</div></div></section><section data-id="bb59e1cadc26c3e5884ccd2b5df601c9"><div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 228px; height: 285px; left: 366px; top: 65px;" data-block-id="3cec35de481ed1053696b68da187fc99"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="120" data-natural-height="150" data-lazy-loaded="" data-src="creating-a-bittorrent-client-with-asyncio/beee3c9f3fd555c2f80d3963767394be.png"></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 600px; left: 174px; top: 420px;" data-block-id="ec56af84dfe64cf5cab1648b63b0f719"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 12;">
+<p>Did a retreat @ the Recurse Center</p>
+
+<p>www.recurse.com</p>
+</div></div></section><section data-id="da93893fd5a3746295f92f8b5690cd1d"><div class="sl-block" data-block-type="text" style="width: 632px; left: 164px; top: 33px; height: auto;" data-block-id="449db421acdc6557c29aa521a645cb1a"><div class="sl-block-content" data-placeholder-tag="h2" data-placeholder-text="Title Text" style="z-index: 11;">
+<h2>Who uses Bittorrent?</h2>
+</div></div>
+<div class="sl-block" data-block-type="text" style="width: 536px; left: 212px; top: 187px; height: auto;" data-block-id="34e4247951603d882b63ded0a7a0b7be"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 12;" dir="ui">
+<ul>
+	<li class="fragment" data-fragment-index="0">Gaming companies
+	<ul>
+		<li>Blizzard, Eve, etc</li>
+	</ul>
+	</li>
+	<li class="fragment" data-fragment-index="1">Education</li>
+	<li class="fragment" data-fragment-index="1">Government</li>
+	<li class="fragment" data-fragment-index="2">Entertainment
+	<ul>
+		<li class="visible">including pirating</li>
+	</ul>
+	</li>
+	<li class="fragment" data-fragment-index="3">Tech companies
+	<ul>
+		<li>Facebook, Twitter</li>
+	</ul>
+	</li>
+</ul>
+</div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 147px; height: 147px; left: 783px; top: 483px;" data-block-id="f21c69a1d6e7b19d20c845ffd66a6626"><div class="sl-block-content fragment" style="z-index: 13;" data-fragment-index="3"><img style="" data-natural-width="400" data-natural-height="400" data-lazy-loaded="" data-src="creating-a-bittorrent-client-with-asyncio/52b4b1f98c4ef5e85b9551dfbf4d0730.png"></div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 81px; height: 81px; left: 689px; top: 468px;" data-block-id="cf32af8b72d8bff3fabd5240da093945"><div class="sl-block-content fragment" style="z-index: 14;" data-fragment-index="3"><img style="" data-natural-width="144" data-natural-height="144" data-lazy-loaded="" data-src="creating-a-bittorrent-client-with-asyncio/4e1096acf5f3d0494ef8c9a13b93e9cc.png"></div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 178px; height: 133px; left: 720px; top: 147px;" data-block-id="32c1191d8ac03f6f13f7afea5242324b"><div class="sl-block-content fragment" style="z-index: 15;" data-fragment-index="0"><img style="" data-natural-width="480" data-natural-height="360" data-lazy-loaded="" data-src="creating-a-bittorrent-client-with-asyncio/bca751472c080dcfa77a344ae8985bb5.jpeg"></div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 179px; height: 179px; left: 61px; top: 387px;" data-block-id="c4c284b1bdaa97bc2bbf83a68cca3d24"><div class="sl-block-style" style="z-index: 16; transform: rotate(360deg);"><div class="sl-block-content fragment" style="z-index: 16;" data-fragment-index="1"><img style="" data-natural-width="250" data-natural-height="250" data-lazy-loaded="" data-src="creating-a-bittorrent-client-with-asyncio/3dabcb2a92177fd560997a00cae101ba.jpeg"></div></div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 150px; height: 150px; left: 44px; top: 130px;" data-block-id="ee33de178ffff122ca2352a9a66d72a3"><div class="sl-block-content fragment" style="z-index: 17;" data-fragment-index="0"><img style="" data-natural-width="150" data-natural-height="150" data-lazy-loaded="" data-src="creating-a-bittorrent-client-with-asyncio/4215bf396d9967f38fdb60a0a5dc813b.jpeg"></div></div></section><section data-id="2f98793a77638f3f93fa96bd4e1589b0"><div class="sl-block" data-block-type="text" style="width: 806px; left: 81px; top: 33px; height: auto;" data-block-id="4e40522d947cc42229ffc41d26032b62"><div class="sl-block-content" data-placeholder-tag="h2" data-placeholder-text="Title Text" style="z-index: 10;">
+<h2>Agenda</h2>
+</div></div>
+<div class="sl-block" data-block-type="text" style="width: 572px; left: 198px; top: 249px; height: auto;" data-block-id="237b45dd3be39844e9534082bcbfc5e2"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<ol>
+	<li>Explain Bittorrent protocol</li>
+	<li>Define steps for writing our client</li>
+	<li>Why Asyncio</li>
+	<li>Look at code</li>
+</ol>
+
+<p> </p>
+</div></div></section><section data-id="c3b3934697d84105a3c056f716538eb1"><div class="sl-block" data-block-type="text" style="width: 836px; left: 0px; top: 33px; height: auto;" data-block-id="7778c33329c0c8382379d654fd9776de"><div class="sl-block-content" data-placeholder-tag="h2" data-placeholder-text="Title Text" style="text-align: left; z-index: 11;">
+<h2>Let's download a torrent</h2>
+</div></div>
+
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 218px; height: 214px; left: 0px; top: 261px;" data-block-id="78414c011c92259a3d1e8028eb3ebce5"><div class="sl-block-content fragment" style="z-index: 12;" data-fragment-index="0"><img style="" data-natural-width="348" data-natural-height="341" data-lazy-loaded="" data-src="creating-a-bittorrent-client-with-asyncio/ede404205755d0c208188f02f898be3f.png"></div></div>
+<div class="sl-block" data-block-type="shape" style="min-width: 4px; min-height: 4px; width: 34px; height: 36px; left: 250px; top: 341px;" data-block-id="be8784e1b6b6f19f5e0c243c7a3bd30f"><div class="sl-block-content fragment" data-shape-type="arrow-right" data-shape-fill-color="#000000" data-shape-stretch="true" style="z-index: 13;" data-fragment-index="1"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 34 36"><polygon points="0,10.799999999999999 17,10.799999999999999 17,0 34,18 17,36 17,25.2 0,25.2" class="shape-element" fill="#000000"></polygon></svg></div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 159px; height: 159px; left: 303px; top: 261px;" data-block-id="585b810d422188d455ec890b2d3e9c49"><div class="sl-block-content fragment" style="z-index: 14;" data-fragment-index="1"><img style="" data-natural-width="512" data-natural-height="512" data-lazy-loaded="" data-src="creating-a-bittorrent-client-with-asyncio/17e8246e4049acd5fa584bb86ab05aac.png"></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 220px; left: 273px; top: 436px;" data-block-id="577dfaaeefbe1c7257f42582936c18eb"><div class="sl-block-content fragment" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 15;" data-fragment-index="1">
+<p>file.txt.torrent</p>
+</div></div>
+<div class="sl-block" data-block-type="shape" style="min-width: 4px; min-height: 4px; width: 34px; height: 36px; left: 494px; top: 341px;" data-block-id="b35c51575d2f34bec765bf83c6370f7a"><div class="sl-block-content fragment" data-shape-type="arrow-right" data-shape-fill-color="#000000" data-shape-stretch="true" style="z-index: 16;" data-fragment-index="2"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 34 36"><polygon points="0,10.799999999999999 17,10.799999999999999 17,0 34,18 17,36 17,25.2 0,25.2" class="shape-element" fill="#000000"></polygon></svg></div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 179px; height: 179px; left: 560px; top: 251px;" data-block-id="c4abd32c4c43035d2fd3e72721609469"><div class="sl-block-content fragment" style="z-index: 17;" data-fragment-index="2"><img style="" data-natural-width="512" data-natural-height="512" data-lazy-loaded="" data-src="creating-a-bittorrent-client-with-asyncio/b99662d421d9c625842e6ad651089819.png"></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 210px; left: 545px; top: 430px;" data-block-id="19e53545a8ac48194f7b6e58b3aaba2e"><div class="sl-block-content fragment" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 18;" data-fragment-index="2">
+<p>Bittorrent</p>
+
+<p>Client</p>
+</div></div>
+<div class="sl-block" data-block-type="shape" style="min-width: 4px; min-height: 4px; width: 34px; height: 36px; left: 748px; top: 341px;" data-block-id="1cee7b1cdf3563d9edb3660f4809e754"><div class="sl-block-content fragment" data-shape-type="arrow-right" data-shape-fill-color="#000000" data-shape-stretch="true" style="z-index: 19;" data-fragment-index="3"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 34 36"><polygon points="0,10.799999999999999 17,10.799999999999999 17,0 34,18 17,36 17,25.2 0,25.2" class="shape-element" fill="#000000"></polygon></svg></div></div>
+<div class="sl-block" data-block-type="shape" style="min-width: 4px; min-height: 4px; width: 80px; height: 79px; left: 828px; top: 289px;" data-block-id="6efb3a9602b4bfcc0c114143bd37a016"><div class="sl-block-content fragment" data-shape-type="symbol-checkmark-circle" data-shape-fill-color="rgb(0, 255, 0)" data-shape-stretch="true" style="z-index: 20;" data-fragment-index="3"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 32 32"><g class="shape-element" fill="rgb(0, 255, 0)"><path d="M16 0c-8.836 0-16 7.164-16 16s7.164 16 16 16 16-7.164 16-16-7.164-16-16-16zM13.52 23.383l-7.362-7.363 2.828-2.828 4.533 4.535 9.617-9.617 2.828 2.828-12.444 12.445z"></path></g></svg></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 192px; left: 782px; top: 436px;" data-block-id="935103818bf4378b8eebadebf966e474"><div class="sl-block-content fragment" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 21;" data-fragment-index="3">
+<p>Done!</p>
+</div></div></section><section data-id="c483197862792bbec1cc26d50ddb392e"><div class="sl-block" data-block-type="text" style="width: 671px; left: 145px; top: 7px; height: auto;" data-block-id="4c77de2defd507d7e011e56bce89ab5e"><div class="sl-block-content" data-placeholder-tag="h2" data-placeholder-text="Title Text" style="text-align: center; z-index: 11;">
+<h2>Our Bittorrent Client</h2>
+
+<ol>
+</ol>
+
+<p> </p>
+
+<p> </p>
+
+<p>Write a program that can download a file when given file.torrent as input</p>
+</div></div>
+<div class="sl-block" data-block-type="code" style="min-width: 30px; min-height: 30px; width: 576px; height: 125px; left: 192px; top: 406px;" data-block-id="463034c9e6fbd73e18743e47146fafe1"><div class="sl-block-content" style="z-index: 12; font-size: 150%;"><pre class="python"><code>$ python client.py file.txt.torrent
+
+   file.txt has finished downloading</code></pre></div></div></section><section data-id="1a409b2ad57fd5ce5f1a4d337711bd80"><div class="sl-block" data-block-type="text" style="width: 905px; left: 28px; top: 24px; height: auto;" data-block-id="26bfe84b7c24d93516fcc05fc07ed485"><div class="sl-block-style" style="z-index: 11; transform: rotate(360deg);"><div class="sl-block-content" data-placeholder-tag="h2" data-placeholder-text="Title Text" style="text-align: left; z-index: 11;">
+<h2>How does torrenting work?</h2>
+</div></div></div>
+
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 89px; height: 99px; left: 267px; top: 574px;" data-block-id="10403f2a9c0ee5ad02ba5a2f5b757098"><div class="sl-block-content fragment" style="z-index: 12;" data-fragment-index="1"><img style="" data-natural-width="115" data-natural-height="128" data-lazy-loaded="" data-src="creating-a-bittorrent-client-with-asyncio/08d95e2db13d974ff80f312fff513e44.png"></div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 128px; height: 76px; left: 96px; top: 312px;" data-block-id="58c34f17659a5b9862d0f37febb6d212"><div class="sl-block-content fragment" style="z-index: 13;" data-fragment-index="0"><img style="" data-natural-width="128" data-natural-height="76" data-lazy-loaded="" data-src="creating-a-bittorrent-client-with-asyncio/2cf8c9c1b8f19ede359c5d8ad5ae39c6.png"></div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 128px; height: 128px; left: 688px; top: 123px;" data-block-id="fa7c7b6c88f5012c3d1c4c2512da0043"><div class="sl-block-content fragment" style="z-index: 14;" data-fragment-index="4"><img style="" data-natural-width="128" data-natural-height="128" data-lazy-loaded="" data-src="creating-a-bittorrent-client-with-asyncio/b2431410051a5deec1e9b04debd4ec67.png"></div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 128px; height: 128px; left: 688px; top: 277px;" data-block-id="5d658e7f9a4763630377ef352b5fc946"><div class="sl-block-content fragment" style="z-index: 15;" data-fragment-index="4"><img style="" data-natural-width="128" data-natural-height="128" data-lazy-loaded="" data-src="creating-a-bittorrent-client-with-asyncio/b2431410051a5deec1e9b04debd4ec67.png"></div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 128px; height: 128px; left: 688px; top: 489px;" data-block-id="f3220e88028113f1f86b1e012c4d9c2e"><div class="sl-block-style" style="z-index: 16;"><div class="sl-block-content fragment" style="z-index: 16;" data-fragment-index="4"><img style="" data-natural-width="128" data-natural-height="128" data-lazy-loaded="" data-src="creating-a-bittorrent-client-with-asyncio/b2431410051a5deec1e9b04debd4ec67.png"></div></div></div>
+<div class="sl-block" data-block-type="line" style="width: auto; height: auto; min-width: 1px; min-height: 1px; left: 180px; top: 388px;" data-block-id="45203025041a370531510e38144357b0"><div class="sl-block-content fragment" data-line-x1="-38" data-line-y1="303" data-line-x2="-189" data-line-y2="138" data-line-color="#000000" data-line-start-type="none" data-line-end-type="line-arrow" style="z-index: 17;" href="" data-fragment-index="3"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="151" height="165" viewbox="-189 138 151 165"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="-38" y1="303" x2="-188" y2="139"></line><line stroke="#000000" stroke-width="2" x1="-38" y1="303" x2="-188" y2="139"></line><path style="fill: rgba(0,0,0,0);" stroke="#000000" stroke-width="2" transform="translate(-188,139) rotate(-42.463)" d="M 6 6 L 0 0 L -6 6"></path></svg></div></div>
+<div class="sl-block" data-block-type="line" style="width: auto; height: auto; min-width: 1px; min-height: 1px; left: 134px; top: 388px;" data-block-id="8946ab34462a7a18113960347777f1a3"><div class="sl-block-content fragment" data-line-x1="-197" data-line-y1="91" data-line-x2="-46" data-line-y2="263" data-line-color="#000000" data-line-start-type="none" data-line-end-type="line-arrow" style="z-index: 18;" href="" data-fragment-index="2"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="151" height="172" viewbox="-197 91 151 172"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="-197" y1="91" x2="-47" y2="261"></line><line stroke="#000000" stroke-width="2" x1="-197" y1="91" x2="-47" y2="261"></line><path style="fill: rgba(0,0,0,0);" stroke="#000000" stroke-width="2" transform="translate(-47,261) rotate(138.72)" d="M 6 6 L 0 0 L -6 6"></path></svg></div></div>
+<div class="sl-block" data-block-type="line" style="width: auto; height: auto; min-width: 1px; min-height: 1px; left: 227px; top: 187px;" data-block-id="ba41b72b44ea8891cb1fc31022502e7a"><div class="sl-block-content fragment" data-line-x1="-153" data-line-y1="82" data-line-x2="308" data-line-y2="-63" data-line-color="#000000" data-line-start-type="none" data-line-end-type="none" style="z-index: 19;" data-fragment-index="5"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="461" height="145" viewbox="-153 -63 461 145"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="-153" y1="82" x2="308" y2="-63"></line><line stroke="#000000" stroke-width="2" x1="-153" y1="82" x2="308" y2="-63"></line></svg></div></div>
+<div class="sl-block" data-block-type="line" style="width: auto; height: auto; min-width: 1px; min-height: 1px; left: 227px; top: 350px;" data-block-id="c5fce587d68b609f2c9da46f8354b789"><div class="sl-block-content fragment" data-line-x1="-159" data-line-y1="76" data-line-x2="302" data-line-y2="76" data-line-color="#000000" data-line-start-type="none" data-line-end-type="none" style="z-index: 20;" data-fragment-index="5"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="461" height="1" viewbox="-159 76 461 1"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="-159" y1="76" x2="302" y2="76"></line><line stroke="#000000" stroke-width="2" x1="-159" y1="76" x2="302" y2="76"></line></svg></div></div>
+<div class="sl-block" data-block-type="line" style="width: auto; height: auto; min-width: 1px; min-height: 1px; left: 227px; top: 369px;" data-block-id="111705657b322931496d5c1cd5dbbbe3"><div class="sl-block-content fragment" data-line-x1="-171" data-line-y1="52" data-line-x2="287" data-line-y2="243" data-line-color="#000000" data-line-start-type="none" data-line-end-type="none" style="z-index: 21;" data-fragment-index="5"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="458" height="191" viewbox="-171 52 458 191"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="-171" y1="52" x2="287" y2="243"></line><line stroke="#000000" stroke-width="2" x1="-171" y1="52" x2="287" y2="243"></line></svg></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 160px; left: 309px; top: 212px;" data-block-id="5c67e179028164c53f60bbbacccd12c0"><div class="sl-block-content fragment" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 22;" dir="ui" data-fragment-index="5"><p><span style="font-size:0.5em;">Download connection<br></span></p></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 215px; left: 9px; top: 496px;" data-block-id="fdce747db592f74ad4bd2cc9c8205325"><div class="sl-block-content fragment" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 23;" dir="ui" data-fragment-index="2">
+<p><span style="font-size:0.5em">HTTP GET: Who has this file?</span></p>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 169px; left: 256px; top: 444px;" data-block-id="d9b81a2df96681f3de0632b14c8af6b3"><div class="sl-block-content fragment" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 24;" dir="ui" data-fragment-index="3">
+<p><span style="font-size:0.5em">Resp: List of N Peers</span></p>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 111px; left: 256px; top: 673px;" data-block-id="ef9a685261556e22df006c0b0df85443"><div class="sl-block-content fragment" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 25;" data-fragment-index="1">
+<p><span style="font-size:0.9em">Tracker</span></p>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 130px; left: 687px; top: 232px;" data-block-id="ba3e893f9ff65673b158e225e73624f1"><div class="sl-block-content fragment" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 26; color: rgb(5, 141, 155);" data-fragment-index="4">
+<p><span style="font-size:0.7em">Peer 1</span></p>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 106px; left: 701px; top: 598px;" data-block-id="01058fe8195249668d4a5d129dbd6f47"><div class="sl-block-content fragment" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 27; color: rgb(5, 141, 155);" data-fragment-index="4">
+<p><span style="font-size:0.7em">Peer N</span></p>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 142px; left: 683px; top: 381px;" data-block-id="0dfd8d7613aa563121d0e2db6e81edbd"><div class="sl-block-content fragment" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 28; color: rgb(5, 141, 155);" data-fragment-index="4">
+<p><span style="font-size:0.7em">Peer 2</span></p>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 46px; left: 731px; top: 444px;" data-block-id="c10459c8f0855c17da0807ed85678ca9"><div class="sl-block-content fragment" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 29; line-height: 0.13; color: rgb(13, 163, 163);" data-has-line-height="" data-fragment-index="4">
+<p>.</p>
+
+<p>.</p>
+
+<p>.</p>
+</div></div></section><section data-id="7a8bc0e4f8dc0e18c2c2c299ba4da776"><div class="sl-block" data-block-type="text" style="width: 671px; left: 145px; top: 70px; height: auto;" data-block-id="751f4610b252033de2c48d19e8231a83"><div class="sl-block-content" data-placeholder-tag="h2" data-placeholder-text="Title Text" style="text-align: center; z-index: 10;">
+<h2>The plan</h2>
+
+<ol>
+	<li>Read file.txt.torrent &amp; get Tracker info</li>
+	<li>Request list of peers from tracker</li>
+	<li>Connect to each peer and download file</li>
+	<li>For each file piece download, write to disk</li>
+</ol>
+
+<p> </p>
+</div></div>
+
+</section><section data-id="d9248b9430d44fa07e4188b41725ea56"><div class="sl-block" data-block-type="text" style="width: 414px; left: 273px; top: -4px; height: auto;" data-block-id="c3ab5e5ea00c310fa4dbb1f9793596a8"><div class="sl-block-content" data-placeholder-tag="h2" data-placeholder-text="Title Text" style="z-index: 10; text-align: left;" dir="ui"><h2>Why Asyncio?</h2></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 920px; left: 20px; top: 254px;" data-block-id="f19a786fd7a16f73e778c5858cfca3e8"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<p><strong>Solving for:</strong></p>
+
+<ul>
+	<li>Maintain multiple concurrent connections to peers</li>
+	<li>Network I/O bound application - waiting for data</li>
+</ul>
+</div></div></section><section data-id="4e8de38b6511f41fa093669dffef5b7c"><div class="sl-block" data-block-type="text" style="width: 235px; left: 363px; top: -4px; height: auto;" data-block-id="ba3b9bbe57e1fd240976a43e756bd5b9"><div class="sl-block-content" data-placeholder-tag="h2" data-placeholder-text="Title Text" style="z-index: 10; text-align: left;" dir="ui">
+<h2>Asyncio</h2>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 725px; left: 118px; top: 249px;" data-block-id="e88649a81cfb829e3e5971737879736c"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<ul>
+	<li>Single process, single threaded approach for concurrent applications</li>
+	<li>Application code yields control at optimal times</li>
+</ul>
+</div></div></section><section data-id="b89cea49b108d2fcf6f830a35f0468cd"><div class="sl-block" data-block-type="text" style="width: 698px; left: 131px; top: 0px; height: auto;" data-block-id="17573fc12ee0da7cbb6a2e2d29fa3c08"><div class="sl-block-content" data-placeholder-tag="h2" data-placeholder-text="Title Text" style="z-index: 10; text-align: left;" dir="ui">
+<h2>Asyncio Building Blocks</h2>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 816px; left: 72px; top: 187px;" data-block-id="c911dcace07aaf337b4217a22a237b4f"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<ul>
+	<li class="fragment" data-fragment-index="0">Coroutine
+	<ul>
+		<li>a function that can be paused and resumed</li>
+		<li>Can "yield" data</li>
+		<li>Can be "sent" data</li>
+	</ul>
+	</li>
+	<li class="fragment" data-fragment-index="1">Task - scheduler for coroutines
+	<ul>
+		<li>Tells coroutines to make an execution 'step'</li>
+	</ul>
+	</li>
+	<li class="fragment" data-fragment-index="2">Event loop - A queue of "tasks" to be executed</li>
+</ul>
+</div></div></section><section data-id="9c958bc78f7bdd422fcb959b7f0dde3e"><div class="sl-block" data-block-type="text" style="width: 575px; left: 193px; top: 0px; height: auto;" data-block-id="1b7214f26c0b5ee037154ffa88745650"><div class="sl-block-content" data-placeholder-tag="h2" data-placeholder-text="Title Text" style="z-index: 11; text-align: left;" dir="ui">
+<h2>Sample Event Loop</h2>
+</div></div>
+<div class="sl-block" data-block-type="code" style="min-width: 30px; min-height: 30px; width: 529px; height: 541px; left: 219px; top: 117px;" data-block-id="4677bc01bc2027135d9f8b33d6dfcd96"><div class="sl-block-content" data-highlight-theme="zenburn" style="z-index: 12; font-size: 130%;"><pre class="python"><code>
+queue = [
+    Task(some_coroutine),
+    Task(another_coroutine)
+]
+
+
+while queue:
+    task = queue.pop(0)
+
+    task.execute_coroutine()
+
+    if task.is_coroutine_done():
+        print('Finished a task')
+    else:
+        queue.append(task)
+        
+
+
+print('Event loop finished tasks')</code></pre></div></div></section><section data-id="a0aaf9b5f746b7d77193906f61f420ff"><div class="sl-block" data-block-type="text" style="width: 816px; left: 72px; top: 0px; height: auto;" data-block-id="84a02cc6bdd2b29eb7063f74d4463ab1"><div class="sl-block-content" data-placeholder-tag="h2" data-placeholder-text="Title Text" style="z-index: 11; text-align: left;" dir="ui">
+<h2>Asyncio: Quick API Tour</h2>
+</div></div>
+<div class="sl-block" data-block-type="code" style="min-width: 30px; min-height: 30px; width: 540px; height: 180px; left: 220px; top: 280px;" data-block-id="c859e986921293e66f6eb3dad44e92b9"><div class="sl-block-content fragment" style="z-index: 12; font-size: 150%;" data-fragment-index="1"><pre class="python"><code>
+async def some_coroutine():
+    a = 1 + 2
+    await asyncio.sleep(1)
+    return a</code></pre></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 600px; left: 180px; top: 147px;" data-block-id="6b8122b611b881866eafb73fd09669e2"><div class="sl-block-content fragment" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 14;" data-fragment-index="0">
+<p>Creating a coroutine</p>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 600px; left: 180px; top: 521px;" data-block-id="8236742d266db33830b56dd07b2e94aa"><div class="sl-block-content fragment" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 18;" data-fragment-index="2">
+<p>use "async def" to create a coroutine</p>
+</div></div></section><section data-id="d3910a06dd18e4948254e1fde46732bc"><div class="sl-block" data-block-type="text" style="width: 888px; left: 46px; top: 7px; height: auto;" data-block-id="1f76a3e0a8d5c980107f2ce189b0aa9f"><div class="sl-block-content" data-placeholder-tag="h2" data-placeholder-text="Title Text" style="z-index: 10; text-align: left;" dir="ui">
+<h2>Asyncio: Quick API Tour Cont'd</h2>
+</div></div>
+<div class="sl-block" data-block-type="code" style="width: 625px; height: 231px; left: 168px; top: 280px;" data-block-id="7b3e4620fc2781618d64386ea8c3d6d9"><div class="sl-block-style" style="z-index: 12;"><div class="sl-block-content fragment" style="z-index: 12; font-size: 150%;" data-fragment-index="1"><pre class="python"><code>
+import asyncio
+
+loop = asyncio.get_event_loop()
+
+loop.run_until_complete(some_coroutine)</code></pre></div></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 600px; left: 180px; top: 191px;" data-block-id="6aef08c713192ee52413761ffffb74b8"><div class="sl-block-content fragment" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 14;" data-fragment-index="0">
+<p>Running a coroutine</p>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 246px; left: 654px; top: 551px;" data-block-id="bf961a01a819e853a2a623c6f43b1168"><div class="sl-block-content fragment" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 15;" data-fragment-index="2">
+<p>wrapped in Task</p>
+</div></div>
+<div class="sl-block" data-block-type="line" style="width: auto; height: auto; left: 605px; top: 473px;" data-block-id="2980e3f8e24278a6bc2cd5947cc006ac"><div class="sl-block-content fragment" data-line-x1="205" data-line-y1="263" data-line-x2="303" data-line-y2="348" data-line-color="#ff0000" data-line-start-type="line-arrow" data-line-end-type="none" style="z-index: 16;" data-fragment-index="2"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="98" height="85" viewbox="205 263 98 85"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="207" y1="264" x2="303" y2="348"></line><line stroke="#ff0000" stroke-width="2" x1="207" y1="264" x2="303" y2="348"></line><path style="fill: rgba(0,0,0,0);" stroke="#ff0000" stroke-width="2" transform="translate(207,264) rotate(130.937)" d="M -6 -6 L 0 0 L 6 -6"></path></svg></div></div></section><section data-id="48f910bb01a526515d2574e3a32cf45f"><div class="sl-block" data-block-type="text" style="width: 895px; left: 33px; top: 0px; height: auto;" data-block-id="60280bd02dd9aafade64793dbdce4022"><div class="sl-block-content" data-placeholder-tag="h2" data-placeholder-text="Title Text" style="z-index: 10; text-align: left;" dir="ui">
+<h2>Asyncio: Quick API Tour Cont'd</h2>
+</div></div>
+
+<div class="sl-block" data-block-type="code" style="width: 904px; height: 416px; left: 33px; top: 214px;" data-block-id="29d89f360a34d47a40413909ba404568"><div class="sl-block-content" style="z-index: 12; font-size: 150%;"><pre class="python"><code>
+import asyncio
+
+
+async def sleep_a_lot()
+    await asyncio.gather(*[some_coroutine() for i range(5)]
+    print('Done')
+
+
+loop = asyncio.get_event_loop()
+
+loop.run_until_complete(sleep_a_lot)</code></pre></div></div>
+
+<div class="sl-block" data-block-type="text" style="height: auto; width: 600px; left: 180px; top: 140px;" data-block-id="61f315da6a3dc9457ce2bd9cc4896cb1"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 14;">
+<p>Run multiple coroutine "simultaneously"</p>
+</div></div></section><section data-id="c7899aff2eff06042bcce7e752f097ef">
+
+</section><section data-id="8d1dd88f91fbe5357d839cc8b3d63bcc"><div class="sl-block" data-block-type="shape" style="min-width: 4px; min-height: 4px; width: 106px; height: 39px; left: 160px; top: 223px;" data-block-id="7dd01ebc0b8227fbe9da588aa0c34aae"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(0, 255, 0)" data-shape-stretch="true" style="z-index: 10;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 106 39"><rect width="106" height="39" class="shape-element" fill="rgb(0, 255, 0)"></rect></svg></div></div>
+<div class="sl-block" data-block-type="shape" style="min-width: 4px; min-height: 4px; width: 54px; height: 39px; left: 266px; top: 223px;" data-block-id="25689f5f2a0205d5f822a72a61653fca"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(68, 68, 68)" data-shape-stretch="true" style="z-index: 11;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 54 39"><rect width="54" height="39" class="shape-element" fill="rgb(68, 68, 68)"></rect></svg></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 154px; left: 3px; top: 223px;" data-block-id="ecd701a49a901367fe2e7beb66cc969a"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 12;">
+<p> Task 1</p>
+</div></div>
+<div class="sl-block" data-block-type="shape" style="min-width: 4px; min-height: 4px; width: 80px; height: 38px; left: 239px; top: 345px;" data-block-id="e1cdea27bb6a982482a419bd2b1f78c6"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(0, 255, 0)" data-shape-stretch="true" style="z-index: 13;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 80 38"><rect width="80" height="38" class="shape-element" fill="rgb(0, 255, 0)"></rect></svg></div></div>
+<div class="sl-block" data-block-type="shape" style="min-width: 4px; min-height: 4px; width: 82px; height: 38px; left: 319px; top: 345px;" data-block-id="71fd58dc02e37bf478da1db94f96d36e"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(68, 68, 68)" data-shape-stretch="true" style="z-index: 14;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 82 38"><rect width="82" height="38" class="shape-element" fill="rgb(68, 68, 68)"></rect></svg></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 154px; left: 3px; top: 345px;" data-block-id="f0989577c9e4da4b2957c8d492e57b05"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 15;">
+<p>Task 2</p>
+</div></div>
+
+
+
+
+
+
+<div class="sl-block" data-block-type="shape" style="min-width: 4px; min-height: 4px; width: 107px; height: 38px; left: 159px; top: 345px;" data-block-id="6b1139c2ec83f621ead3e4a7fd177978"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(68, 68, 68)" data-shape-stretch="true" style="z-index: 16;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 107 38"><rect width="107" height="38" class="shape-element" fill="rgb(68, 68, 68)"></rect></svg></div></div>
+
+
+<div class="sl-block" data-block-type="shape" style="min-width: 4px; min-height: 4px; width: 81px; height: 39px; left: 320px; top: 223px;" data-block-id="058d2101111fc8499530caed550351e7"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(0, 255, 0)" data-shape-stretch="true" style="z-index: 17;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 81 39"><rect width="81" height="39" class="shape-element" fill="rgb(0, 255, 0)"></rect></svg></div></div>
+<div class="sl-block" data-block-type="shape" style="min-width: 4px; min-height: 4px; width: 60px; height: 38px; left: 730px; top: 260px;" data-block-id="d06ba9ccf16523f232946bb8565ccbdd"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(0, 255, 0)" data-shape-stretch="true" style="z-index: 18;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 60 38"><rect width="60" height="38" class="shape-element" fill="rgb(0, 255, 0)"></rect></svg></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 94px; left: 790px; top: 259px;" data-block-id="f0d73fdb999440a29f6b893923ddbec8"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 19;">
+<p>active</p>
+</div></div>
+<div class="sl-block" data-block-type="shape" style="min-width: 4px; min-height: 4px; width: 60px; height: 38px; left: 730px; top: 325px;" data-block-id="c8ba6b7819b1940b3e02ad44971132d0"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(68, 68, 68)" data-shape-stretch="true" style="z-index: 20;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 60 38"><rect width="60" height="38" class="shape-element" fill="rgb(68, 68, 68)"></rect></svg></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 131px; left: 790px; top: 325px;" data-block-id="6b784f08ee4a29cc190f70c48f5ddd43"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 21;">
+<p>inactive</p>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 757px; left: 0px; top: 0px;" data-block-id="c57711475a5a7dfb47030d0e573dcf4e"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 22;">
+<h2>Cooperative Multitasking</h2>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 808px; left: 80px; top: 506px;" data-block-id="1f6a51a87fb0377b71699a0fa82dfc08"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 23;">
+<ul>
+	<li>Everything runs in one process, under a single thread</li>
+	<li>Tasks "yield" control at optimal times</li>
+</ul>
+</div></div>
+<div class="sl-block" data-block-type="line" style="width: auto; height: auto; min-width: 1px; min-height: 1px; left: 159px; top: 177px;" data-block-id="630999f7fa1137a53629c0cdf16e6e9e"><div class="sl-block-content" data-line-x1="-221" data-line-y1="-40" data-line-x2="260" data-line-y2="-40" data-line-color="#4a86e8" data-line-start-type="none" data-line-end-type="arrow" style="z-index: 24;" data-line-width="4px"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="481" height="1" viewbox="-221 -40 481 1"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="-221" y1="-40" x2="254" y2="-40"></line><line stroke="#4a86e8" stroke-width="4" x1="-221" y1="-40" x2="254" y2="-40"></line><polygon fill="#4a86e8" transform="translate(254,-40) rotate(90)" points="0,-6 6,6 -6,6"></polygon></svg></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 130px; left: 334px; top: 138px;" data-block-id="07498eb7ac0541e33a028920f725cf05"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 25;">
+<p><span style="font-size:0.5em">execution time</span></p>
+</div></div>
+<div class="sl-block" data-block-type="shape" style="min-width: 4px; min-height: 4px; width: 119px; height: 39px; left: 399px; top: 223px;" data-block-id="3cb908a0982ab77ad8feb986d5250b8d"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(68, 68, 68)" data-shape-stretch="true" style="z-index: 26;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 119 39"><rect width="119" height="39" class="shape-element" fill="rgb(68, 68, 68)"></rect></svg></div></div>
+<div class="sl-block" data-block-type="shape" style="min-width: 4px; min-height: 4px; width: 43px; height: 39px; left: 518px; top: 223px;" data-block-id="8a33dfcaa0beffe53cdce7cb7d1da8da"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(0, 255, 0)" data-shape-stretch="true" style="z-index: 27;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 43 39"><rect width="43" height="39" class="shape-element" fill="rgb(0, 255, 0)"></rect></svg></div></div>
+<div class="sl-block" data-block-type="shape" style="min-width: 4px; min-height: 4px; width: 81px; height: 39px; left: 559px; top: 223px;" data-block-id="19092d4ddce88e2b2a77abfc348e8638"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(68, 68, 68)" data-shape-stretch="true" style="z-index: 28;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 81 39"><rect width="81" height="39" class="shape-element" fill="rgb(68, 68, 68)"></rect></svg></div></div>
+<div class="sl-block" data-block-type="shape" style="min-width: 4px; min-height: 4px; width: 119px; height: 39px; left: 399px; top: 344px;" data-block-id="5a125d0f19aee3a5427332ace6703fd7"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(0, 255, 0)" data-shape-stretch="true" style="z-index: 29;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 119 39"><rect width="119" height="39" class="shape-element" fill="rgb(0, 255, 0)"></rect></svg></div></div>
+<div class="sl-block" data-block-type="shape" style="min-width: 4px; min-height: 4px; width: 41px; height: 39px; left: 518px; top: 344px;" data-block-id="afbe9eec8ad3f95a01733be6b725c002"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(68, 68, 68)" data-shape-stretch="true" style="z-index: 31;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 41 39"><rect width="41" height="39" class="shape-element" fill="rgb(68, 68, 68)"></rect></svg></div></div>
+<div class="sl-block" data-block-type="shape" style="min-width: 4px; min-height: 4px; width: 81px; height: 39px; left: 559px; top: 344px;" data-block-id="6c5f0129106bff4c2e24a39a8bc9416f"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(0, 255, 0)" data-shape-stretch="true" style="z-index: 32;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 81 39"><rect width="81" height="39" class="shape-element" fill="rgb(0, 255, 0)"></rect></svg></div></div></section><section data-id="49cd06ea1a63f57b666dbc4724f5ae14" data-background-color="#ffffff"><div class="sl-block" data-block-type="code" style="width: 960px; height: 700px; left: 2px; top: 0px;" data-block-id="fb9a4227c49db56825cebadfddc00a92"><div class="sl-block-content" style="z-index: 10; font-size: 149%;" data-highlight-theme="zenburn"><pre class="python"><code>import asyncio, sys
+
+async def download(torrent_file):
+    # Read and parse ".torrent" file
+    torrent = read_torrent(torrent_file)
+
+    # Get peers list from tracker in ".torrent" file
+    peer_addresses = await get_peers(torrent)
+
+    # Object to track peer communication/state
+    peers = [Peer(addr) for addr in peer_addresses]
+
+    # Wait for all download coroutines to finish
+    await asyncio.gather(
+        *[peer.download() for peer in peers]  # Producer
+    )
+
+
+if __name__ == '__main__':
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(download(sys.argv[1])
+    loop.close()</code></pre></div></div>
+</section><section data-id="f1f073207e9e4abc4b39492d6597ece7"><div class="sl-block" data-block-type="code" style="width: 960px; height: 700px; left: 0px; top: 0px;" data-block-id="1b5e6e171fddfa59fcc2863a293f875e"><div class="sl-block-content" style="z-index: 10; font-size: 137%;"><pre><code>import asyncio, sys
+
+
+async def download(torrent_file):
+    # Read and parse ".torrent" file
+    torrent = read_torrent(torrent_file)
+
+    # Object to track peer communication/state
+    peer_addresses = await get_peers(torrent)
+
+    # Queue for storing downloaded file pieces
+    file_pieces_queue = asyncio.Queue()
+
+    # Object to coordinate writing file to disk
+    file_saver = FileSaver(file_pieces_queue)
+
+    # Object to track peer communication/state
+    peers = [Peer(addr, file_pieces_queue) for addr in peer_addresses]
+
+    await asyncio.gather(
+        *([peer.download() for peer in peers] +  # Producers
+          [file_saver.start()])                  # Consumers
+    )</code></pre></div></div>
+</section><section data-id="9c70cf6c8a42180c065ffc9a7b43ec6e"><div class="sl-block" data-block-type="shape" style="width: 80px; height: 38px; left: 160px; top: 223px;" data-block-id="b6c41dfc7f3b41339ef93a9ab81fc9fe"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(0, 255, 0)" data-shape-stretch="true" style="z-index: 10;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 80 38"><rect width="80" height="38" class="shape-element" fill="rgb(0, 255, 0)"></rect></svg></div></div>
+<div class="sl-block" data-block-type="shape" style="width: 266px; height: 38px; left: 239px; top: 223px;" data-block-id="966c6dbec5b67267a10dfb76e2a8cd93"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(68, 68, 68)" data-shape-stretch="true" style="z-index: 11;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 266 38"><rect width="266" height="38" class="shape-element" fill="rgb(68, 68, 68)"></rect></svg></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 126px; left: 22px; top: 223px;" data-block-id="08fa836fc43fb5379d886d29b1016bc2"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 12;">
+<p>Peer 1</p>
+</div></div>
+
+<div class="sl-block" data-block-type="shape" style="width: 258px; height: 38px; left: 352px; top: 295px;" data-block-id="949e0ce08f28382a91927e4fa0df14ae"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(68, 68, 68)" data-shape-stretch="true" style="z-index: 13;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 258 38"><rect width="258" height="38" class="shape-element" fill="rgb(68, 68, 68)"></rect></svg></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 126px; left: 22px; top: 299px;" data-block-id="8e371ac2fd2a09085dbcde4a773664b2"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 14;">
+<p>Peer 2</p>
+</div></div>
+<div class="sl-block" data-block-type="shape" style="width: 103px; height: 38px; left: 377px; top: 364px;" data-block-id="f3af01fbc5f5a9b70e1bd8ee0a740826"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(0, 255, 0)" data-shape-stretch="true" style="z-index: 15;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 103 38"><rect width="103" height="38" class="shape-element" fill="rgb(0, 255, 0)"></rect></svg></div></div>
+<div class="sl-block" data-block-type="shape" style="width: 161px; height: 38px; left: 479px; top: 364px;" data-block-id="4ee14ff6fd9a38aaf97453c5db7e8a4a"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(68, 68, 68)" data-shape-stretch="true" style="z-index: 16;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 161 38"><rect width="161" height="38" class="shape-element" fill="rgb(68, 68, 68)"></rect></svg></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 126px; left: 22px; top: 365px;" data-block-id="a6182a1eef450f2b850ba60002581c02"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 17;">
+<p>Peer 3</p>
+</div></div>
+<div class="sl-block" data-block-type="shape" style="width: 25px; height: 38px; left: 239px; top: 433px;" data-block-id="acbfb018952cb3cd397c416192d33b8b"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(0, 255, 0)" data-shape-stretch="true" style="z-index: 18;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 25 38"><rect width="25" height="38" class="shape-element" fill="rgb(0, 255, 0)"></rect></svg></div></div>
+<div class="sl-block" data-block-type="shape" style="width: 103px; height: 38px; left: 377px; top: 433px;" data-block-id="c3695183909e6bfe585fc99a78d41906"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(68, 68, 68)" data-shape-stretch="true" style="z-index: 19;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 103 38"><rect width="103" height="38" class="shape-element" fill="rgb(68, 68, 68)"></rect></svg></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 142px; left: 10px; top: 433px;" data-block-id="d075ffd80551f4add1ed47f6fcc6aa8c"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 20;">
+<p>File Saver</p>
+</div></div>
+<div class="sl-block" data-block-type="shape" style="width: 113px; height: 38px; left: 159px; top: 295px;" data-block-id="2cfe7138a450556a8bac90046e2a7cfb"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(68, 68, 68)" data-shape-stretch="true" style="z-index: 21;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 113 38"><rect width="113" height="38" class="shape-element" fill="rgb(68, 68, 68)"></rect></svg></div></div>
+<div class="sl-block" data-block-type="shape" style="width: 218px; height: 38px; left: 159px; top: 364px;" data-block-id="c9c125992e5414bc55f496634c64ff9c"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(68, 68, 68)" data-shape-stretch="true" style="z-index: 22;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 218 38"><rect width="218" height="38" class="shape-element" fill="rgb(68, 68, 68)"></rect></svg></div></div>
+<div class="sl-block" data-block-type="shape" style="width: 79px; height: 38px; left: 160px; top: 433px;" data-block-id="40561fbf67677115ebd270c4cf54d5db"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(68, 68, 68)" data-shape-stretch="true" style="z-index: 23;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 79 38"><rect width="79" height="38" class="shape-element" fill="rgb(68, 68, 68)"></rect></svg></div></div>
+
+<div class="sl-block" data-block-type="shape" style="width: 60px; height: 38px; left: 735px; top: 295px;" data-block-id="88becfe725bb360b1aecfbb265656433"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(0, 255, 0)" data-shape-stretch="true" style="z-index: 24;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 60 38"><rect width="60" height="38" class="shape-element" fill="rgb(0, 255, 0)"></rect></svg></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 162px; left: 800px; top: 304px;" data-block-id="9fe096012cb9aa3c04cf0072b1fc064a"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 25; line-height: 0.65;" data-has-line-height="">
+<p>Active</p>
+</div></div>
+<div class="sl-block" data-block-type="shape" style="width: 60px; height: 38px; left: 735px; top: 366px;" data-block-id="cd1e44e3d2502ec3c03af5ef1bf788bf"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(68, 68, 68)" data-shape-stretch="true" style="z-index: 26;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 60 38"><rect width="60" height="38" class="shape-element" fill="rgb(68, 68, 68)"></rect></svg></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 146px; left: 807px; top: 364px;" data-block-id="07406f965bd427e3489f88c94b9434d7"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 27;">
+<p>Inactive</p>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 757px; left: 0px; top: 0px;" data-block-id="6f677d2e26adafb60ffc7e4a0f9f8697"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 28;">
+<h2>Our Bittorrent client...</h2>
+</div></div>
+<div class="sl-block" data-block-type="line" style="width: auto; height: auto; left: 159px; top: 177px;" data-block-id="753b3534394f393e6ae220c7ea501d09"><div class="sl-block-content" data-line-x1="-221" data-line-y1="-40" data-line-x2="260" data-line-y2="-40" data-line-color="#4a86e8" data-line-start-type="none" data-line-end-type="arrow" style="z-index: 29;" data-line-width="4px"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="481" height="1" viewbox="-221 -40 481 1"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="-221" y1="-40" x2="254" y2="-40"></line><line stroke="#4a86e8" stroke-width="4" x1="-221" y1="-40" x2="254" y2="-40"></line><polygon fill="#4a86e8" transform="translate(254,-40) rotate(90)" points="0,-6 6,6 -6,6"></polygon></svg></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 130px; left: 334px; top: 138px;" data-block-id="fa4e6ad99d76d8c9b05e1a198359fbe2"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 30;">
+<p><span style="font-size:0.5em">execution time</span></p>
+</div></div>
+
+<div class="sl-block" data-block-type="shape" style="width: 89px; height: 38px; left: 263px; top: 433px;" data-block-id="2ab251e2ab9a00463b98fff730e9f4dd"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(68, 68, 68)" data-shape-stretch="true" style="z-index: 32;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 89 38"><rect width="89" height="38" class="shape-element" fill="rgb(68, 68, 68)"></rect></svg></div></div>
+<div class="sl-block" data-block-type="shape" style="width: 27px; height: 38px; left: 352px; top: 433px;" data-block-id="f5d6400adf5da3c1550e3ab00fa527fb"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(0, 255, 0)" data-shape-stretch="true" style="z-index: 33;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 27 38"><rect width="27" height="38" class="shape-element" fill="rgb(0, 255, 0)"></rect></svg></div></div>
+<div class="sl-block" data-block-type="shape" style="width: 80px; height: 38px; left: 272px; top: 295px;" data-block-id="1290c0ed78ca6c6e533ae3920a244043"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(0, 255, 0)" data-shape-stretch="true" style="z-index: 34;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 80 38"><rect width="80" height="38" class="shape-element" fill="rgb(0, 255, 0)"></rect></svg></div></div>
+<div class="sl-block" data-block-type="shape" style="width: 25px; height: 38px; left: 480px; top: 433px;" data-block-id="5407e1835f76c0af32c7c21d28de97a2"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(0, 255, 0)" data-shape-stretch="true" style="z-index: 35;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 25 38"><rect width="25" height="38" class="shape-element" fill="rgb(0, 255, 0)"></rect></svg></div></div>
+<div class="sl-block" data-block-type="shape" style="width: 80px; height: 38px; left: 505px; top: 223px;" data-block-id="7f3df5073d62a46da44b86265058deac"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(0, 255, 0)" data-shape-stretch="true" style="z-index: 37;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 80 38"><rect width="80" height="38" class="shape-element" fill="rgb(0, 255, 0)"></rect></svg></div></div>
+<div class="sl-block" data-block-type="shape" style="width: 55px; height: 38px; left: 585px; top: 223px;" data-block-id="f3a801be6946c65c5c229710c23822b0"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(68, 68, 68)" data-shape-stretch="true" style="z-index: 38;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 55 38"><rect width="55" height="38" class="shape-element" fill="rgb(68, 68, 68)"></rect></svg></div></div>
+<div class="sl-block" data-block-type="shape" style="width: 80px; height: 38px; left: 505px; top: 433px;" data-block-id="c1bc3111c8eb0dfdacec8c4fa1a53703"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(68, 68, 68)" data-shape-stretch="true" style="z-index: 39;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 80 38"><rect width="80" height="38" class="shape-element" fill="rgb(68, 68, 68)"></rect></svg></div></div>
+<div class="sl-block" data-block-type="shape" style="width: 25px; height: 38px; left: 585px; top: 433px;" data-block-id="f4f33c31b48f4be794f2fae075792c4d"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(0, 255, 0)" data-shape-stretch="true" style="z-index: 40;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 25 38"><rect width="25" height="38" class="shape-element" fill="rgb(0, 255, 0)"></rect></svg></div></div>
+<div class="sl-block" data-block-type="shape" style="width: 30px; height: 38px; left: 610px; top: 433px;" data-block-id="b476deda39e112028e0490c651bab18b"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(68, 68, 68)" data-shape-stretch="true" style="z-index: 41;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 30 38"><rect width="30" height="38" class="shape-element" fill="rgb(68, 68, 68)"></rect></svg></div></div>
+<div class="sl-block" data-block-type="shape" style="width: 30px; height: 38px; left: 610px; top: 295px;" data-block-id="b815556e1b80503314d327e3e147456a"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(0, 255, 0)" data-shape-stretch="true" style="z-index: 42;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 30 38"><rect width="30" height="38" class="shape-element" fill="rgb(0, 255, 0)"></rect></svg></div></div></section><section data-id="2c5e7aacae10eac87393f6c7360dd6af"><div class="sl-block" data-block-type="text" style="width: 671px; left: 145px; top: 70px; height: auto;" data-block-id="9c6ea2ca7591591e40373aefc94e0a83"><div class="sl-block-content" data-placeholder-tag="h2" data-placeholder-text="Title Text" style="text-align: center; z-index: 10;">
+<h2>The plan</h2>
+
+<ol>
+	<li><strong>Read file.txt.torrent &amp; get Tracker info</strong></li>
+	<li>Request list of peers from tracker</li>
+	<li>Connect to each peer and download file</li>
+	<li>For each file piece download, write to disk</li>
+</ol>
+
+<p> </p>
+</div></div>
+
+</section><section data-id="8339d3a36097a9252d22dbe8601be032"><div class="sl-block" data-block-type="text" style="height: auto; width: 757px; left: 102px; top: -4px;" data-block-id="f19c7cd11cd98bb4cddbbcc3bd119ba4"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<h2>Let's open the torrent file</h2>
+</div></div>
+<div class="sl-block" data-block-type="code" style="min-width: 30px; min-height: 30px; width: 928px; height: 186px; left: 16px; top: 172px;" data-block-id="d0c0ac5a0fe93f6a751b7c50a0153b86"><div class="sl-block-content fragment" style="z-index: 12; font-size: 130%;" data-fragment-index="0"><pre class="bash"><code>$ cat hello.txt.torrent
+
+d8:announce31:http://10.0.16.36:6969/announce10:created by25:
+Transmission/2.84 (14307)13:creation datei1504559097e8:encoding5
+:UTF-84:infod6:lengthi35e4:name9 :hello.txt12:piece length
+i32768e6:pieces20:�3�b0gŵ�{	*�$K7:privatei0eee%</code></pre></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 600px; left: 180px; top: 442px;" data-block-id="69a571869cff04413ef107fcc2805867"><div class="sl-block-content fragment" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 13;" data-fragment-index="1">
+<ul>
+	<li>Byte string file</li>
+	<li>File data is "bencoded"</li>
+</ul>
+</div></div></section><section data-id="cf808f1a5b420f9aa9fedc1212111a5b"><div class="sl-block" data-block-type="text" style="height: auto; width: 757px; left: 0px; top: 8px;" data-block-id="e0d945e69e994e8a7ea4ab22e1163e1d"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<h2 style="text-align:left">BEncoding</h2>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 600px; left: 0px; top: 132px;" data-block-id="0c1b3c134edcf3fd3a0b4f2577f9ef42"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 12;">
+<ul>
+	<li>Organizes data in a terse format</li>
+	<li>Saves bandwidth</li>
+</ul>
+</div></div>
+<div class="sl-block" data-block-type="table" style="height: auto; min-width: 120px; min-height: 30px; width: 920px; left: 14px; top: 259px;" data-block-id="82843f9b777d55c28b22bf41293eda05"><div class="sl-block-content" style="z-index: 13; text-align: center;" data-table-rows="5"><table><tbody>
+<tr>
+<th style="width: 239px;">Data type</th>
+<th style="width: 254px;">Format</th>
+<th>Example</th>
+</tr>
+<tr>
+<td style="width: 239px;">Byte string</td>
+<td style="width: 254px;">&lt;len&gt;:&lt;str&gt;</td>
+<td>4:spam =&gt; "spam"</td>
+</tr>
+<tr>
+<td style="width: 239px;">Integer</td>
+<td style="width: 254px;">i&lt;num&gt;e</td>
+<td>i-55e =&gt; -55</td>
+</tr>
+<tr>
+<td style="width: 239px;">list</td>
+<td style="width: 254px;">l&lt;item&gt;e</td>
+<td>l2:hie =&gt; ["hi"]</td>
+</tr>
+<tr>
+<td style="width: 239px;">dictionary</td>
+<td style="width: 254px;">d&lt;key&gt;&lt;val&gt;e</td>
+<td>d2:hi3:byee =&gt; {"hi": "bye"}</td>
+</tr>
+</tbody></table></div></div></section><section data-id="a8a804d10a51a04b42f971c2386b63a3"><div class="sl-block" data-block-type="text" style="height: auto; width: 800px; left: 80px; top: 0px;" data-block-id="65b0bcd472d233b3db7f5f88cd03672f"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<h2>BDecoding the metafile file</h2>
+</div></div>
+<div class="sl-block" data-block-type="code" style="width: 805px; height: 125px; left: 78px; top: 140px;" data-block-id="b7acb985235eab3c4ee6adf53a88f4ac"><div class="sl-block-content fragment" style="z-index: 12;" data-fragment-index="0"><pre class="bash"><code>$ cat hello.txt.torrent
+
+d8:announce31:http://10.0.16.36:6969/announce10:created by25:Transmission/2.84
+ (14307)13:creation datei1504559097e8:encoding5:UTF-84:infod6:lengthi35e4:name9
+:hello.txt12:piece lengthi32768e6:pieces20:�3�b0gŵ�{	*�$K7:privatei0eee%</code></pre></div></div>
+<div class="sl-block" data-block-type="code" style="min-width: 30px; min-height: 30px; width: 880px; height: 256px; left: 41px; top: 401px;" data-block-id="7ab08b38a570985979c9eadddbecc3b6"><div class="sl-block-content fragment" style="z-index: 13; font-size: 120%;" data-fragment-index="2"><pre class="bash"><code>{b'announce': b'http://10.0.16.36:6969/announce',
+ b'created by': b'Transmission/2.84 (14307)',
+ b'creation date': 1504559097,
+ b'encoding': b'UTF-8',
+ b'info': {b'length': 35,
+           b'name': b'hello.txt',
+           b'piece length': 32768,
+           b'pieces': b'\xad3\xd8b0g\xc5\xb5\x17\xaa{\x1a\t\x02*\xed\xbd$K\x13',
+           b'private': 0}}</code></pre></div></div>
+<div class="sl-block" data-block-type="line" style="width: auto; height: auto; min-width: 1px; min-height: 1px; left: 480px; top: 300px;" data-block-id="1f70639c666529dc94b1f0b28b973f8e"><div class="sl-block-content fragment" data-line-x1="20" data-line-y1="100" data-line-x2="20" data-line-y2="30" data-line-color="#000000" data-line-start-type="arrow" data-line-end-type="none" style="z-index: 14;" data-fragment-index="1"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="1" height="70" viewbox="20 30 1 70"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="20" y1="96" x2="20" y2="30"></line><line stroke="#000000" stroke-width="2" x1="20" y1="96" x2="20" y2="30"></line><polygon fill="#000000" transform="translate(20,96) rotate(0)" points="0,4 4,-4 -4,-4"></polygon></svg></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 600px; left: 120px; top: 315px;" data-block-id="022373947d46e9e5b24f5b18cf96aeb3"><div class="sl-block-content fragment" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 15;" data-fragment-index="1">
+<p>bdecode(   )</p>
+</div></div></section><section data-id="c58a1d0365654cf5e3a50d06bbc26292"><div class="sl-block" data-block-type="text" style="height: auto; width: 320px; left: 320px; top: 12px;" data-block-id="5d6988669d6b8d3a218aa3e40484db99"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<h2 style="text-align:left">File Pieces</h2>
+</div></div>
+
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 304px; height: 271px; left: 37px; top: 182px;" data-block-id="6c214e223a90117b6763fe47d822d688"><div class="sl-block-content" style="z-index: 12;"><img style="" data-natural-width="304" data-natural-height="271" data-lazy-loaded="" data-src="creating-a-bittorrent-client-with-asyncio/0bcc97178557354cfee8fe959d47f01e.png"></div></div>
+
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 302px; height: 45px; left: 492px; top: 280px;" data-block-id="2ba07bb98ed491f1a1c8c2fb5f3e4326"><div class="sl-block-content fragment" style="z-index: 13;" data-fragment-index="0"><img style="" data-natural-width="302" data-natural-height="45" data-lazy-loaded="" data-src="creating-a-bittorrent-client-with-asyncio/f901981a85859ceaf3eccc9d564fc33d.png"></div></div>
+<div class="sl-block" data-block-type="shape" style="min-width: 4px; min-height: 4px; width: 300px; height: 300px; left: 492px; top: 153px;" data-block-id="17ea1060f1e46cfe8c7740e3bb87eab2"><div class="sl-block-style" style="z-index: 16; opacity: 0.15;"><div class="sl-block-content fragment" data-shape-type="circle" data-shape-fill-color="#000000" data-shape-stretch="true" style="z-index: 16;" data-shape-stroke-color="#000000" data-shape-stroke-width="2" data-fragment-index="0"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 300 300"><defs><clippath id="shape-mask-1-1507223378976"><ellipse rx="150" ry="150" cx="150" cy="150"></ellipse></clippath></defs><ellipse rx="150" ry="150" cx="150" cy="150" clip-path="url(#shape-mask-1-1507223378976)" class="shape-element" fill="#000000" stroke="#000000" stroke-width="4"></ellipse></svg></div></div></div>
+<div class="sl-block" data-block-type="line" style="width: auto; height: auto; min-width: 1px; min-height: 1px; left: 333px; top: 153px;" data-block-id="d81d0ba1f503bc5032edb16f71d11d9b"><div class="sl-block-style" style="z-index: 14; opacity: 0.15;"><div class="sl-block-content fragment" data-line-x1="-47" data-line-y1="-60" data-line-x2="261" data-line-y2="-97" data-line-color="#000000" data-line-start-type="none" data-line-end-type="none" style="z-index: 14;" data-fragment-index="0"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="308" height="37" viewbox="-47 -97 308 37"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="-47" y1="-60" x2="261" y2="-97"></line><line stroke="#000000" stroke-width="2" x1="-47" y1="-60" x2="261" y2="-97"></line></svg></div></div></div>
+<div class="sl-block" data-block-type="line" style="width: auto; height: auto; min-width: 1px; min-height: 1px; left: 333px; top: 220px;" data-block-id="ab33c8ec5eed62d8ebe80b90c3fe30dc"><div class="sl-block-style" style="z-index: 15; opacity: 0.15;"><div class="sl-block-content fragment" data-line-x1="-62" data-line-y1="-45" data-line-x2="165" data-line-y2="163" data-line-color="#000000" data-line-start-type="none" data-line-end-type="none" style="z-index: 15;" data-fragment-index="0"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="227" height="208" viewbox="-62 -45 227 208"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="-62" y1="-45" x2="165" y2="163"></line><line stroke="#000000" stroke-width="2" x1="-62" y1="-45" x2="165" y2="163"></line></svg></div></div></div></section><section data-id="dc33649314cae1f6a7ffe29b9cd8adef"><div class="sl-block" data-block-type="text" style="width: 671px; left: 145px; top: 70px; height: auto;" data-block-id="854670fbd7518287c6c05c84bdeb2a28"><div class="sl-block-content" data-placeholder-tag="h2" data-placeholder-text="Title Text" style="text-align: center; z-index: 10;">
+<h2>The plan</h2>
+
+<ol>
+	<li>Read file.txt.torrent &amp; get tracker info</li>
+	<li><strong>Request list of peers from tracker</strong></li>
+	<li>Connect to each peer and download file</li>
+	<li>For each file piece download, write to disk</li>
+</ol>
+
+<p> </p>
+</div></div>
+
+</section><section data-id="a84abb9e5431924e5ac1fe89044ddf17"><div class="sl-block" data-block-type="text" style="width: 365px; left: 0px; top: 0px; height: auto;" data-block-id="4c7d455b654d6d38340c037a115c2644"><div class="sl-block-content" data-placeholder-tag="h2" data-placeholder-text="Title Text" style="text-align: center; z-index: 11;">
+<h2>The Tracker</h2>
+</div></div>
+
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 476px; left: 457px; top: 226px;" data-block-id="ff8cffa2b4e8369b691a52110cbbd17a"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 12;">
+<p>The Tracker is an HTTP(S) server that responds to HTTP GET requests.</p>
+
+<p> </p>
+
+<p>It keeps track of who in the swarm has a torrent.</p>
+</div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 128px; height: 76px; left: 143px; top: 165px;" data-block-id="35b5e4c33e9aa9ebb22e8f9f519521fc"><div class="sl-block-content" style="z-index: 13;"><img style="" data-natural-width="128" data-natural-height="76" data-lazy-loaded="" data-src="creating-a-bittorrent-client-with-asyncio/2cf8c9c1b8f19ede359c5d8ad5ae39c6.png"></div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 115px; height: 128px; left: 143px; top: 427px;" data-block-id="a3dae54ce6e6f590394b37f25f4f85ba"><div class="sl-block-content" style="z-index: 14;"><img style="" data-natural-width="115" data-natural-height="128" data-lazy-loaded="" data-src="creating-a-bittorrent-client-with-asyncio/08d95e2db13d974ff80f312fff513e44.png"></div></div>
+<div class="sl-block" data-block-type="line" style="width: auto; height: auto; min-width: 1px; min-height: 1px; left: 182px; top: 242px;" data-block-id="1a498448eb54871f966acc904c3da03a"><div class="sl-block-content" data-line-x1="-197" data-line-y1="31" data-line-x2="-197" data-line-y2="206" data-line-color="#000000" data-line-start-type="none" data-line-end-type="line-arrow" style="z-index: 15;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="1" height="175" viewbox="-197 31 1 175"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="-197" y1="31" x2="-197" y2="204"></line><line stroke="#000000" stroke-width="2" x1="-197" y1="31" x2="-197" y2="204"></line><path style="fill: rgba(0,0,0,0);" stroke="#000000" stroke-width="2" transform="translate(-197,204) rotate(180)" d="M 6 6 L 0 0 L -6 6"></path></svg></div></div>
+<div class="sl-block" data-block-type="line" style="width: auto; height: auto; min-width: 1px; min-height: 1px; left: 225px; top: 242px;" data-block-id="b3c3591d38010d053045ddbc57fe393e"><div class="sl-block-content" data-line-x1="-197" data-line-y1="31" data-line-x2="-197" data-line-y2="206" data-line-color="#000000" data-line-start-type="line-arrow" data-line-end-type="none" style="z-index: 16;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="1" height="175" viewbox="-197 31 1 175"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="-197" y1="33" x2="-197" y2="206"></line><line stroke="#000000" stroke-width="2" x1="-197" y1="33" x2="-197" y2="206"></line><path style="fill: rgba(0,0,0,0);" stroke="#000000" stroke-width="2" transform="translate(-197,33) rotate(180)" d="M -6 -6 L 0 0 L 6 -6"></path></svg></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 96px; left: 63px; top: 286px;" data-block-id="ffac254686916824d99d5809e907dcef"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 17;">
+<p><span style="font-size:0.5em">HTTP GET: Who has this file?</span></p>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 125px; left: 239px; top: 291px;" data-block-id="e910ef597ea586079b425b85d6a28a9b"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 18;">
+<p><span style="font-size:0.5em">RESP: List of N Peers</span></p>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 161px; left: 127px; top: 572px;" data-block-id="c012b384a69c1ca98b415dcce2ac0d01"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 19;">
+<p>Tracker</p>
+</div></div></section><section data-id="7869a961b73373f7178eed4e935215bd"><div class="sl-block" data-block-type="text" style="width: 560px; left: 0px; top: 0px; height: auto;" data-block-id="7cbfa43db8f96b2342b36db6d43cdd45"><div class="sl-block-content" data-placeholder-tag="h2" data-placeholder-text="Title Text" style="text-align: center; z-index: 11;">
+<h2>Tracker: HTTP GET</h2>
+</div></div>
+
+<div class="sl-block" data-block-type="table" style="height: auto; min-width: 120px; min-height: 30px; width: 852px; left: 54px; top: 125px;" data-block-id="02bcdd4f358c5dcbf1d236a77d59cac9"><div class="sl-block-content" style="z-index: 12; font-size: 70%; color: rgb(0, 0, 0);" data-table-cols="2" data-table-rows="10"><table><tbody>
+<tr>
+<th>Params</th>
+<th>Description</th>
+</tr>
+<tr>
+<td><strong>info_hash</strong></td>
+<td>URL encoded 20-byte SHA1 of the info_dict</td>
+</tr>
+<tr>
+<td>peer_id</td>
+<td>URL encoded 20-byte string ID that identifies our client</td>
+</tr>
+<tr>
+<td>port</td>
+<td>Port our client is listening on</td>
+</tr>
+<tr>
+<td>event</td>
+<td>{started, stopped, completed}</td>
+</tr>
+<tr>
+<td>uploaded</td>
+<td>Total amount uploaded (Bytes) since 'started' event</td>
+</tr>
+<tr>
+<td>downloaded</td>
+<td>Total amount downloaded (Bytes) since 'started' event</td>
+</tr>
+<tr>
+<td>left</td>
+<td>Total amount uploaded (Bytes) since 'started' event</td>
+</tr>
+<tr>
+<td>compact</td>
+<td>Bool. Denotes if client accepts compact list of peers</td>
+</tr>
+<tr>
+<td>no_peer_id</td>
+<td>Bool. Indicates if peer can omit peer_id in peers dict response</td>
+</tr>
+</tbody></table></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 789px; left: 26px; top: 74px;" data-block-id="3eee57b777b2c9541009f31a54b60825"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 13; font-size: 95%;">
+<p><strong>URL</strong>: http://my-tracker.com/announce?params=params</p>
+</div></div></section><section data-id="7e88e4a23b9166e6280f61a7c55a8e55"><div class="sl-block" data-block-type="text" style="width: 640px; left: 0px; top: 0px; height: auto;" data-block-id="b550d4e6c3d4f2876dbabd3250cebdca"><div class="sl-block-content" data-placeholder-tag="h2" data-placeholder-text="Title Text" style="text-align: center; z-index: 11;">
+<h2>Aiohttp GET Request</h2>
+</div></div>
+
+<div class="sl-block" data-block-type="code" style="width: 801px; height: 286px; left: 79px; top: 147px;" data-block-id="c8e1adcb7763a973fc8fe3c9e7acf21b"><div class="sl-block-content" style="z-index: 12; font-size: 130%;"><pre class="python"><code>import aiohttp
+
+torrent = get_torrent_file()
+
+async def request_peers(self):
+    async with aiohttp.ClientSession() as session:
+        resp = await session.get(tracker_url, params=params)
+        resp_data = await resp.read()
+        peers = bencoder.decode(resp_data)
+        return peers
+</code></pre></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 693px; left: 134px; top: 521px;" data-block-id="45a949b199eb06a8f33befaaebabfb83"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 13;">
+<ul>
+	<li>Use async packages</li>
+	<li>If you can't, run synchronous code in a thread</li>
+</ul>
+</div></div></section><section data-id="dc9888fc76f8ba485027d08d61c0fde5">
+
+<div class="sl-block" data-block-type="text" style="width: 533px; left: 214px; top: 0px; height: auto;" data-block-id="25caa963167df762db99d95d7bf1ec6d"><div class="sl-block-content" data-placeholder-tag="h2" data-placeholder-text="Title Text" style="text-align: center; z-index: 10;">
+<h2>Tracker Response</h2>
+</div></div>
+<div class="sl-block" data-block-type="code" style="min-width: 30px; min-height: 30px; width: 531px; height: 70px; left: 214px; top: 112px;" data-block-id="b8e3657533b445b8a5a2a18baf0bc270"><div class="sl-block-content" style="z-index: 11;"><pre class="python"><code>b'd8:completei1e10:downloadedi0e10:incomplete
+i1e8:intervali1921e12:min intervali960e5:peers
+12:\xc0\xa8c\x01\xe90\xc0\xa8cd\xc8\xd5e'</code></pre></div></div>
+<div class="sl-block" data-block-type="code" style="min-width: 30px; min-height: 30px; width: 674px; height: 211px; left: 144px; top: 280px;" data-block-id="9e9f659f28617e9f8d7ac3b44d5ec0fa"><div class="sl-block-content" style="z-index: 12; font-size: 120%;"><pre class="python"><code>{
+  b'complete': 1,
+  b'downloaded': 0,
+  b'incomplete': 1,
+  b'interval': 1918,
+  b'min interval': 959,
+  b'peers': b'\xc0\xa8c\x01\xe90\xc0\xa8cd\xc8\xd5\xc0\xa8c\x01\xe90\xc0\xa8cd\xc8\xd5'
+}</code></pre></div></div>
+<div class="sl-block" data-block-type="code" style="min-width: 30px; min-height: 30px; width: 759px; height: 43px; left: 100px; top: 587px;" data-block-id="798b67e285d05e1e066319b367489c4c"><div class="sl-block-content" style="z-index: 13; font-size: 160%;"><pre class="python"><code>['192.168.99.100:51413', '33.67.123.201:69596']</code></pre></div></div>
+<div class="sl-block" data-block-type="line" style="width: auto; height: auto; min-width: 1px; min-height: 1px; left: 481px; top: 197px;" data-block-id="4ca50412a7c0c5ed247d73de230fe759"><div class="sl-block-content" data-line-x1="101" data-line-y1="1" data-line-x2="101" data-line-y2="-63" data-line-color="#000000" data-line-start-type="line-arrow" data-line-end-type="none" style="z-index: 14;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="1" height="64" viewbox="101 -63 1 64"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="101" y1="-1" x2="101" y2="-63"></line><line stroke="#000000" stroke-width="2" x1="101" y1="-1" x2="101" y2="-63"></line><path style="fill: rgba(0,0,0,0);" stroke="#000000" stroke-width="2" transform="translate(101,-1) rotate(0)" d="M -6 -6 L 0 0 L 6 -6"></path></svg></div></div>
+<div class="sl-block" data-block-type="line" style="width: auto; height: auto; min-width: 1px; min-height: 1px; left: 481px; top: 507px;" data-block-id="44a6820c31d69bba829e0ad2abb7b970"><div class="sl-block-content" data-line-x1="102" data-line-y1="1" data-line-x2="102" data-line-y2="-52" data-line-color="#000000" data-line-start-type="line-arrow" data-line-end-type="none" style="z-index: 16;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="1" height="53" viewbox="102 -52 1 53"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="102" y1="-1" x2="102" y2="-52"></line><line stroke="#000000" stroke-width="2" x1="102" y1="-1" x2="102" y2="-52"></line><path style="fill: rgba(0,0,0,0);" stroke="#000000" stroke-width="2" transform="translate(102,-1) rotate(0)" d="M -6 -6 L 0 0 L 6 -6"></path></svg></div></div></section><section data-id="ede52e608f8f93f9e8894eedb0d26235"><div class="sl-block" data-block-type="text" style="width: 671px; left: 145px; top: 70px; height: auto;" data-block-id="a1a2c7b4015cf37632940fb203ecb47b"><div class="sl-block-content" data-placeholder-tag="h2" data-placeholder-text="Title Text" style="text-align: center; z-index: 10;">
+<h2>The plan</h2>
+
+<ol>
+	<li>Read file.txt.torrent &amp; get Tracker info</li>
+	<li>Request list of peers from tracker</li>
+	<li><strong>Connect to each peer and download file</strong></li>
+	<li>For each file piece download, write to disk</li>
+</ol>
+
+<p> </p>
+</div></div>
+
+</section><section data-id="1a9460af5b42bc258f6be3a85aa40d37"><div class="sl-block" data-block-type="text" style="height: auto; width: 591px; left: 185px; top: 0px;" data-block-id="e62a516ccf592ffaf76bf83b873b631b"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
+<h2>Working with Peers</h2>
+</div></div>
+
+<div class="sl-block" data-block-type="text" style="height: auto; width: 431px; left: 265px; top: 103px;" data-block-id="8a5d1201220ee5b405d3588980e7d182"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 12;">
+<ul>
+	<li>Manage Peer State
+	<ul>
+		<li>Choked</li>
+		<li>Interested</li>
+	</ul>
+	</li>
+	<li>Handle Peer messages
+	<ul>
+		<li>Handshake</li>
+		<li>Keep Alive</li>
+		<li>Choke</li>
+		<li>Unchoke</li>
+		<li>Interested</li>
+		<li>Not Interested</li>
+		<li>Have</li>
+		<li>Bitfield</li>
+		<li>Request</li>
+		<li>Piece</li>
+	</ul>
+	</li>
+</ul>
+</div></div></section><section data-id="875a7151ed7959ca2c89f964772e31b1"><div class="sl-block" data-block-type="text" style="height: auto; width: 320px; left: 320px; top: 0px;" data-block-id="b32e15c94dc9071879ed6d13e5f9cb94"><div class="sl-block-content fragment" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-fragment-index="0">
+<h2>Peer State</h2>
+</div></div>
+
+<div class="sl-block" data-block-type="text" style="height: auto; width: 937px; left: 12px; top: 124px;" data-block-id="d1210586a1547f10be75e6a02d66bbda"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;" dir="ui">
+<ul>
+	<li class="fragment" data-fragment-index="1">Choked - Not allowed to send requests.</li>
+	<li class="fragment" data-fragment-index="2">Interested - Wants to send requests (download)</li>
+</ul>
+</div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 272px; height: 258px; left: 48px; top: 321px;" data-block-id="661f1f96ae7751f41587acc8c905b603"><div class="sl-block-content fragment" style="z-index: 12;" data-fragment-index="3"><img style="" data-natural-width="320" data-natural-height="303" data-lazy-loaded="" data-src="creating-a-bittorrent-client-with-asyncio/a81712b323acee68f4280d511e4a8fd0.jpg"></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 323px; left: 23px; top: 581px;" data-block-id="a5a57f8b5a5b01ee34d844ba07ad64b9"><div class="sl-block-content fragment" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 13; font-size: 75%;" data-fragment-index="3">
+<p><strong>Initial State</strong></p>
+
+<ul>
+	<li>Choked</li>
+	<li>Not Interested</li>
+</ul>
+</div></div>
+<div class="sl-block" data-block-type="line" style="width: auto; height: auto; min-width: 1px; min-height: 1px; left: 380px; top: 450px;" data-block-id="6b5dac4457c0656c5ef9d15115988bb2"><div class="sl-block-content fragment" data-line-x1="0" data-line-y1="200" data-line-x2="180" data-line-y2="200" data-line-color="#000000" data-line-start-type="none" data-line-end-type="line-arrow" style="z-index: 14;" data-fragment-index="5"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="180" height="1" viewbox="0 200 180 1"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="0" y1="200" x2="178" y2="200"></line><line stroke="#000000" stroke-width="2" x1="0" y1="200" x2="178" y2="200"></line><path style="fill: rgba(0,0,0,0);" stroke="#000000" stroke-width="2" transform="translate(178,200) rotate(90)" d="M 6 6 L 0 0 L -6 6"></path></svg></div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 258px; height: 258px; left: 611px; top: 321px;" data-block-id="3529edad1efb825285aec1ec147085d3"><div class="sl-block-content fragment" style="z-index: 15;" data-fragment-index="4"><img style="" data-natural-width="309" data-natural-height="309" data-lazy-loaded="" data-src="creating-a-bittorrent-client-with-asyncio/976a1ebb17e678a67f26ce6390d3842e.png"></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 323px; left: 579px; top: 581px;" data-block-id="b6a65301ac759a6e336da4448b914acc"><div class="sl-block-content fragment" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 16; font-size: 75%;" data-fragment-index="4">
+<p><strong>Cooperative State</strong></p>
+
+<ul>
+	<li>Unchoked</li>
+	<li>Interested</li>
+</ul>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 241px; left: 350px; top: 482px;" data-block-id="25e0f5a92157c6a86b285adca80108d8"><div class="sl-block-content fragment" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 18; font-size: 75%;" data-fragment-index="5">
+<ol>
+	<li>Wait for <strong>Unchoke</strong>
+</li>
+	<li>Send <strong>Interested</strong>
+</li>
+</ol>
+</div></div></section><section data-id="72385125d115808bdf2cb869522ac94c"><div class="sl-block" data-block-type="text" style="height: auto; width: 320px; left: 320px; top: -4px;" data-block-id="124232cbfc0361a587d5c53778ec7719"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<h2>Peer State</h2>
+</div></div>
+
+<div class="sl-block" data-block-type="code" style="min-width: 30px; min-height: 30px; width: 926px; height: 490px; left: 17px; top: 132px;" data-block-id="9b1c72ceaa782389c98d77fe2a536f53"><div class="sl-block-content" style="z-index: 12; font-size: 150%;"><pre class="python"><code>
+class Peer(object):
+    def __init__(self, host, port, file_queue):
+        self.host = host
+        self.port = port
+        self.file_queue = file_queue
+
+        # Denotes if peer is choking us
+        self.peer_choking = True
+
+        # Denotes if we've informed our peer we're interested
+        self.am_interested = False
+
+
+    async def download(self):
+        pass</code></pre></div></div></section><section data-id="3aef5ddcf8e5d99227b83c9d802bfce3"><div class="sl-block" data-block-type="text" style="height: auto; width: 700px; left: 130px; top: 0px;" data-block-id="e756253a5bac286ad2be6ee8cf95abdf"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
+<h2>Peer Message Exchange</h2>
+</div></div>
+
+<div class="sl-block" data-block-type="line" style="width: auto; height: auto; min-width: 1px; min-height: 1px; left: 279px; top: 124px;" data-block-id="fc83a076b8050c5a0aa18255b9e95913"><div class="sl-block-content" data-line-x1="-99" data-line-y1="380" data-line-x2="-99" data-line-y2="-151" data-line-color="#1c4587" data-line-start-type="line-arrow" data-line-end-type="none" style="z-index: 11;" data-line-width="4px"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="1" height="531" viewbox="-99 -151 1 531"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="-99" y1="377" x2="-99" y2="-151"></line><line stroke="#1c4587" stroke-width="4" x1="-99" y1="377" x2="-99" y2="-151"></line><path style="fill: rgba(0,0,0,0);" stroke="#1c4587" stroke-width="4" transform="translate(-99,377) rotate(0)" d="M -9 -9 L 0 0 L 9 -9"></path></svg></div></div>
+<div class="sl-block" data-block-type="line" style="width: auto; height: auto; min-width: 1px; min-height: 1px; left: 682px; top: 124px;" data-block-id="9e8a7fba676f3897ee6c876aedb7ab87"><div class="sl-block-content" data-line-x1="-99" data-line-y1="380" data-line-x2="-99" data-line-y2="-151" data-line-color="#1c4587" data-line-start-type="line-arrow" data-line-end-type="none" style="z-index: 12;" data-line-width="4px"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="1" height="531" viewbox="-99 -151 1 531"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="-99" y1="377" x2="-99" y2="-151"></line><line stroke="#1c4587" stroke-width="4" x1="-99" y1="377" x2="-99" y2="-151"></line><path style="fill: rgba(0,0,0,0);" stroke="#1c4587" stroke-width="4" transform="translate(-99,377) rotate(0)" d="M -9 -9 L 0 0 L 9 -9"></path></svg></div></div>
+<div class="sl-block" data-block-type="line" style="width: auto; height: auto; min-width: 1px; min-height: 1px; left: 279px; top: 143px;" data-block-id="2649622c9904d82542f66ecb1e3377c5"><div class="sl-block-content fragment" data-line-x1="-99" data-line-y1="-110" data-line-x2="304" data-line-y2="-110" data-line-color="#1c4587" data-line-start-type="line-arrow" data-line-end-type="line-arrow" style="z-index: 13;" data-fragment-index="0"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="403" height="1" viewbox="-99 -110 403 1"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="-97" y1="-110" x2="302" y2="-110"></line><line stroke="#1c4587" stroke-width="2" x1="-97" y1="-110" x2="302" y2="-110"></line><path style="fill: rgba(0,0,0,0);" stroke="#1c4587" stroke-width="2" transform="translate(-97,-110) rotate(90)" d="M -6 -6 L 0 0 L 6 -6"></path><path style="fill: rgba(0,0,0,0);" stroke="#1c4587" stroke-width="2" transform="translate(302,-110) rotate(90)" d="M 6 6 L 0 0 L -6 6"></path></svg></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 171px; left: 406px; top: 104px;" data-block-id="f126540ceb47bb72896322208343d372"><div class="sl-block-content fragment" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 14;" data-fragment-index="0">
+<p><span style="font-size:0.7em">TCP connection</span></p>
+</div></div>
+<div class="sl-block" data-block-type="line" style="width: auto; height: auto; min-width: 1px; min-height: 1px; left: 280px; top: 340px;" data-block-id="6bf6be473e7e0064c71776afb0a11842"><div class="sl-block-content fragment" data-line-x1="-99" data-line-y1="-110" data-line-x2="303" data-line-y2="-110" data-line-color="#ff9900" data-line-start-type="line-arrow" data-line-end-type="none" style="z-index: 15;" data-line-width="4px" data-fragment-index="3"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="402" height="1" viewbox="-99 -110 402 1"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="-96" y1="-110" x2="303" y2="-110"></line><line stroke="#ff9900" stroke-width="4" x1="-96" y1="-110" x2="303" y2="-110"></line><path style="fill: rgba(0,0,0,0);" stroke="#ff9900" stroke-width="4" transform="translate(-96,-110) rotate(90)" d="M -9 -9 L 0 0 L 9 -9"></path></svg></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 125px; left: 418px; top: 301px;" data-block-id="b73ab21a360dcca97bd5125242499573"><div class="sl-block-content fragment" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 18;" data-fragment-index="3">
+<p><span style="font-size:0.7em"><strong>Unchoke</strong> </span></p>
+</div></div>
+<div class="sl-block" data-block-type="line" style="width: auto; height: auto; min-width: 1px; min-height: 1px; left: 280px; top: 410px;" data-block-id="7f6ca2ba6c199127f81f77e5034eed14"><div class="sl-block-content fragment" data-line-x1="-99" data-line-y1="-110" data-line-x2="304" data-line-y2="-110" data-line-color="#ff9900" data-line-start-type="none" data-line-end-type="line-arrow" style="z-index: 19;" data-line-width="4px" data-fragment-index="4"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="403" height="1" viewbox="-99 -110 403 1"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="-99" y1="-110" x2="301" y2="-110"></line><line stroke="#ff9900" stroke-width="4" x1="-99" y1="-110" x2="301" y2="-110"></line><path style="fill: rgba(0,0,0,0);" stroke="#ff9900" stroke-width="4" transform="translate(301,-110) rotate(90)" d="M 9 9 L 0 0 L -9 9"></path></svg></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 125px; left: 418px; top: 371px;" data-block-id="db2ac4230f8dd74568088386af4dccc7"><div class="sl-block-content fragment" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 20;" data-fragment-index="4">
+<p><span style="font-size:0.7em"><strong>Interested</strong> </span></p>
+</div></div>
+<div class="sl-block" data-block-type="line" style="width: auto; height: auto; min-width: 1px; min-height: 1px; left: 280px; top: 477px;" data-block-id="e26b876084a9c976986b3766b046280f"><div class="sl-block-content fragment" data-line-x1="-99" data-line-y1="-110" data-line-x2="304" data-line-y2="-110" data-line-color="#6aa84f" data-line-start-type="line-arrow" data-line-end-type="none" style="z-index: 21;" data-line-width="4px" data-fragment-index="5"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="403" height="1" viewbox="-99 -110 403 1"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="-96" y1="-110" x2="304" y2="-110"></line><line stroke="#6aa84f" stroke-width="4" x1="-96" y1="-110" x2="304" y2="-110"></line><path style="fill: rgba(0,0,0,0);" stroke="#6aa84f" stroke-width="4" transform="translate(-96,-110) rotate(90)" d="M -9 -9 L 0 0 L 9 -9"></path></svg></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 180px; left: 391px; top: 438px;" data-block-id="0527009edd6550524c41e62b22117899"><div class="sl-block-content fragment" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 22;" data-fragment-index="5">
+<p><span style="font-size:0.7em"><strong>Have/Bitfield</strong></span></p>
+</div></div>
+<div class="sl-block" data-block-type="line" style="width: auto; height: auto; min-width: 1px; min-height: 1px; left: 280px; top: 550px;" data-block-id="e521999527a6868d8fa55e18cc507f2d"><div class="sl-block-content fragment" data-line-x1="-99" data-line-y1="-110" data-line-x2="304" data-line-y2="-110" data-line-color="#6aa84f" data-line-start-type="none" data-line-end-type="line-arrow" style="z-index: 23;" data-line-width="4px" data-fragment-index="6"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="403" height="1" viewbox="-99 -110 403 1"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="-99" y1="-110" x2="301" y2="-110"></line><line stroke="#6aa84f" stroke-width="4" x1="-99" y1="-110" x2="301" y2="-110"></line><path style="fill: rgba(0,0,0,0);" stroke="#6aa84f" stroke-width="4" transform="translate(301,-110) rotate(90)" d="M 9 9 L 0 0 L -9 9"></path></svg></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 180px; left: 390px; top: 511px;" data-block-id="a4c986d9aaa15d83c04e5d725e0ffc97"><div class="sl-block-content fragment" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 24;" data-fragment-index="6">
+<p><span style="font-size:0.7em"><strong>Request</strong></span></p>
+</div></div>
+<div class="sl-block" data-block-type="line" style="width: auto; height: auto; min-width: 1px; min-height: 1px; left: 279px; top: 617px;" data-block-id="36968a82d0ad1731113d44e047c66b73"><div class="sl-block-content fragment" data-line-x1="-99" data-line-y1="-110" data-line-x2="304" data-line-y2="-110" data-line-color="#6aa84f" data-line-start-type="line-arrow" data-line-end-type="none" style="z-index: 25;" data-line-width="4px" data-fragment-index="7"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="403" height="1" viewbox="-99 -110 403 1"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="-96" y1="-110" x2="304" y2="-110"></line><line stroke="#6aa84f" stroke-width="4" x1="-96" y1="-110" x2="304" y2="-110"></line><path style="fill: rgba(0,0,0,0);" stroke="#6aa84f" stroke-width="4" transform="translate(-96,-110) rotate(90)" d="M -9 -9 L 0 0 L 9 -9"></path></svg></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 102px; left: 429px; top: 578px;" data-block-id="e9b87cc536720cd12e764c24d59db99f"><div class="sl-block-content fragment" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 26;" data-fragment-index="7">
+<p><span style="font-size:0.7em"><strong>Piece</strong></span></p>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 48px; left: 457px; top: 636px;" data-block-id="cfb93c090deb8162fb2800a0b2b0b6b1"><div class="sl-block-content fragment" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 27; line-height: 0.13; color: rgb(106, 168, 79);" data-has-line-height="" data-fragment-index="7">
+<p>.</p>
+
+<p>.</p>
+
+<p>.</p>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 112px; left: 223px; top: 655px;" data-block-id="26b398bce1bb9e56255b150f1652cd82"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 28;">
+<p><span style="font-size:0.7em">Client</span></p>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 112px; left: 626px; top: 655px;" data-block-id="378c2b86fb5ad626a99f19e4a8b8e5c9"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 29;">
+<p><span style="font-size:0.7em">Peer</span></p>
+</div></div>
+<div class="sl-block" data-block-type="line" style="width: auto; height: auto; min-width: 1px; min-height: 1px; left: 279px; top: 203px;" data-block-id="7c6312bc8bc680cf5ee398ecd430e7e3"><div class="sl-block-content fragment" data-line-x1="-99" data-line-y1="-110" data-line-x2="304" data-line-y2="-110" data-line-color="#e06666" data-line-start-type="none" data-line-end-type="line-arrow" style="z-index: 16;" data-line-width="4px" data-fragment-index="1"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="403" height="1" viewbox="-99 -110 403 1"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="-99" y1="-110" x2="301" y2="-110"></line><line stroke="#e06666" stroke-width="4" x1="-99" y1="-110" x2="301" y2="-110"></line><path style="fill: rgba(0,0,0,0);" stroke="#e06666" stroke-width="4" transform="translate(301,-110) rotate(90)" d="M 9 9 L 0 0 L -9 9"></path></svg></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 197px; left: 382px; top: 164px;" data-block-id="577815676cfbddd1c0d76be87c2c310c"><div class="sl-block-content fragment" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 30;" data-fragment-index="1">
+<p><span style="font-size:0.7em"><strong>Client Handshake</strong> </span></p>
+</div></div>
+<div class="sl-block" data-block-type="line" style="width: auto; height: auto; min-width: 1px; min-height: 1px; left: 279px; top: 270px;" data-block-id="7243c01fdca155dc6efd087d4bac502f"><div class="sl-block-content fragment" data-line-x1="-99" data-line-y1="-110" data-line-x2="304" data-line-y2="-110" data-line-color="#e06666" data-line-start-type="line-arrow" data-line-end-type="none" style="z-index: 17;" data-line-width="4px" data-fragment-index="2"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="403" height="1" viewbox="-99 -110 403 1"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="-96" y1="-110" x2="304" y2="-110"></line><line stroke="#e06666" stroke-width="4" x1="-96" y1="-110" x2="304" y2="-110"></line><path style="fill: rgba(0,0,0,0);" stroke="#e06666" stroke-width="4" transform="translate(-96,-110) rotate(90)" d="M -9 -9 L 0 0 L 9 -9"></path></svg></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 175px; left: 393px; top: 231px;" data-block-id="540fad3a7c0a2e3c818fa2611409fc83"><div class="sl-block-content fragment" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 31;" data-fragment-index="2">
+<p><span style="font-size:0.7em"><strong>Peer Handshake</strong></span></p>
+</div></div>
+<div class="sl-block" data-block-type="code" style="min-width: 30px; min-height: 30px; width: 262px; height: 31px; left: 6px; top: 325px;" data-block-id="6fdf82cec7017f4109158afe15b75aae"><div class="sl-block-content fragment" style="z-index: 32;" data-fragment-index="3"><pre class="python"><code>self.peer_choking = False</code></pre></div></div>
+<div class="sl-block" data-block-type="code" style="min-width: 30px; min-height: 30px; width: 262px; height: 31px; left: 6px; top: 395px;" data-block-id="f300a58d71a1ee3515e28614ac47629b"><div class="sl-block-content fragment" style="z-index: 34;" data-fragment-index="4"><pre class="python"><code>self.am_interested = True</code></pre></div></div></section><section data-id="0bfcd7a9a2a18544304b528ddbaf3fbb"><div class="sl-block" data-block-type="text" style="height: auto; width: 764px; left: 98px; top: 0px;" data-block-id="1d84dbf3cf20b89d9ad6686bc67df263"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<h2>Peer Message: Handshake</h2>
+</div></div>
+
+<div class="sl-block" data-block-type="code" style="width: 569px; height: 516px; left: 8px; top: 114px;" data-block-id="a9de285ecd2466dae8dc59e19e5c156b"><div class="sl-block-content" style="z-index: 12;"><pre class="python"><code>
+class Peer(object):
+    async def download(self):
+        reader, writer = await asyncio.open_connection(
+            self.host, self.port
+        )
+
+        handshake = b''.join([
+            chr(19).encode(),
+            b'BitTorrent protocol',
+            (chr(0) * 8).encode(),
+            info_hash,
+            PEER_ID.encode()
+        ])
+
+        # Send Handshake
+        writer.write(handshake)
+        await writer.drain()
+
+        # Read and validate response
+        peer_handshake = await reader.read(68)
+        self.validate(peer_handshake)
+
+        # Start exchanging messages...</code></pre></div></div>
+<div class="sl-block" data-block-type="table" style="height: auto; min-width: 120px; min-height: 30px; width: 345px; left: 600px; top: 216px;" data-block-id="b6131925e6052ff5783c45f8fa76020c"><div class="sl-block-content" style="z-index: 13; text-align: center;" data-table-cols="1" data-table-rows="6"><table><tbody>
+<tr><th>Handshake format</th></tr>
+<tr><td>Protocol string length</td></tr>
+<tr><td>"Bittorrent protocol"</td></tr>
+<tr><td>Reserved bytes</td></tr>
+<tr><td>info_hash</td></tr>
+<tr><td>peer id</td></tr>
+</tbody></table></div></div></section><section data-id="6575e5426d5ae79c322fe2f332918e2a"><div class="sl-block" data-block-type="text" style="height: auto; width: 764px; left: 98px; top: 0px;" data-block-id="933ffdd5ff9bfc7cf0bb3812409b4b2b"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<h2>Peer Message Formats</h2>
+</div></div>
+
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 600px; left: 180px; top: 284px;" data-block-id="dd6d5f87f0b3dd46e9cf9bd61037b23b"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 12;">
+<p>All remaining messages:</p>
+
+<p> </p>
+
+<p>&lt;message length&gt; &lt;id&gt; &lt;payload&gt;</p>
+</div></div></section><section data-id="bfebba9e73f359f83dbf7eb440e7cacf"><div class="sl-block" data-block-type="text" style="height: auto; width: 700px; left: 130px; top: 0px;" data-block-id="892b59d6bbe49f150c913412e4107b4f"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<h2>Peer Message Formats</h2>
+</div></div>
+
+<div class="sl-block" data-block-type="table" style="height: auto; min-width: 120px; min-height: 30px; width: 836px; left: 62px; top: 168px;" data-block-id="65b49524be4be27e70e4d771e1747a5f"><div class="sl-block-content" style="z-index: 12; font-size: 90%;" data-table-rows="10" data-table-cols="2"><table><tbody>
+<tr>
+<th style="width: 245px;">Message</th>
+<th>Format</th>
+</tr>
+<tr>
+<td>Keep Alive</td>
+<td>&lt;len=0000&gt;</td>
+</tr>
+<tr>
+<td>Choke</td>
+<td>&lt;len=0001&gt;&lt;id=0&gt;</td>
+</tr>
+<tr>
+<td>Unchoke</td>
+<td>&lt;len=0001&gt;&lt;id=1&gt;</td>
+</tr>
+<tr>
+<td>Interested</td>
+<td>&lt;len=0001&gt;&lt;id=2&gt;</td>
+</tr>
+<tr>
+<td>Not Interested<br>
+</td>
+<td>&lt;len=0001&gt;&lt;id=3&gt;</td>
+</tr>
+<tr>
+<td>Have</td>
+<td>&lt;len=0005&gt;&lt;id=4&gt;&lt;piece index&gt;</td>
+</tr>
+<tr>
+<td>Bitfield</td>
+<td>&lt;len=0001+X&gt;&lt;id=5&gt;&lt;bitfield&gt;</td>
+</tr>
+<tr>
+<td>Request</td>
+<td>&lt;len=0013&gt;&lt;id=6&gt;&lt;index&gt;&lt;begin&gt;&lt;length&gt;</td>
+</tr>
+<tr>
+<td>Piece</td>
+<td>&lt;len=0009+X&gt;&lt;id=7&gt;&lt;index&gt;&lt;begin&gt;&lt;block&gt;</td>
+</tr>
+</tbody></table></div></div></section><section data-id="4862736fbb00392b744d09b007b0371a"><div class="sl-block" data-block-type="text" style="height: auto; width: 764px; left: 98px; top: 0px;" data-block-id="dca196423c9456c2aaa5db51d50bb480"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
+<h2>Peer Message Exchange</h2>
+</div></div>
+
+<div class="sl-block" data-block-type="code" style="width: 960px; height: 603px; left: 0px; top: 97px;" data-block-id="88004f643df86e5b9f164a90c2649bd2"><div class="sl-block-content" style="z-index: 11; font-size: 130%;"><pre class="python"><code>class Peer(object):
+    async def download(self):
+        
+        # Start exchanging messages
+
+        buf = b''  # Holds data read from peer
+
+        while True:
+            resp = await reader.read(REQUEST_SIZE)
+            buf += resp
+
+            while True:
+                if len(buf) &lt; 4:
+                    break
+
+                msg_message_length = self.get_message_message_length(buf)
+
+                if msg_message_length == 0:
+                    # Handle Keep Alive
+                    continue
+
+                msg_id = struct.unpack('&gt;b', buf[4:5])</code></pre></div></div></section><section data-id="d1341344639407825690ebf012bc9e4a"><div class="sl-block" data-block-type="text" style="height: auto; width: 764px; left: 98px; top: 0px;" data-block-id="32ad86aefd0c52d9ad63483e5c280b15"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
+<h2>Peer Message Exchange</h2>
+</div></div>
+
+<div class="sl-block" data-block-type="code" style="width: 884px; height: 580px; left: 38px; top: 112px;" data-block-id="9063f9d5a1dee1769cc085e52a4081ba"><div class="sl-block-content" style="z-index: 11; font-size: 130%;"><pre class="python"><code>class Peer(object):
+    async def download(self):
+                # ... Looping through Peer messages
+
+                if msg_message_length == 0:
+                    # Handle Keep Alive
+                    continue
+
+                msg_id = struct.unpack('&gt;b', buf[4:5])  # 5th byte is the ID
+
+                if msg_id == 0:
+                    # Handle Choke...
+
+                elif msg_id == 1:
+                    # Handle Unchoke...
+                    await self.send_interested_message()
+
+                elif msg_id == 2:
+                    # Handle Interested...
+
+                elif msg_id == 3:
+                    # Handle Not interested...
+
+                elif msg_id == 4:
+                    # Handle Have...
+
+                elif msg_id == 5:
+                    # Handle Bitfield...
+
+                elif msg_id == 7:
+                    # Handle Piece...
+                    self.file_queue.enqueue(piece_data)
+
+                await self.request_a_piece()
+</code></pre></div></div></section><section data-id="04fab84befdedf8832de5d7655d4cf0c"><div class="sl-block" data-block-type="text" style="width: 695px; left: 133px; top: 90px; height: auto;" data-block-id="7a6b11f888a7407613969aa0add75b39"><div class="sl-block-content" data-placeholder-tag="h2" data-placeholder-text="Title Text" style="text-align: center; z-index: 10;">
+<h2>The plan</h2>
+
+<ol>
+	<li>Read file.txt.torrent &amp; get Tracker info</li>
+	<li>Request list of peers from tracker</li>
+	<li>Connect to each peer and download file</li>
+	<li><strong>For each file piece download, write to disk</strong></li>
+</ol>
+
+<p> </p>
+</div></div>
+
+</section><section data-id="6aa040c0af2e5cb63a3c3a55b8bf71cc"><div class="sl-block" data-block-type="text" style="height: auto; width: 764px; left: 98px; top: 0px;" data-block-id="f4beca9577bae990c7da7968b2881c51"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
+<h2>File Saver</h2>
+</div></div>
+
+<div class="sl-block" data-block-type="code" style="width: 744px; height: 427px; left: 108px; top: 140px;" data-block-id="e17d68686316ad4c75bd56543d5d6d8e"><div class="sl-block-content" style="z-index: 11; font-size: 150%;"><pre class="python"><code>class FileSaver(object):
+    def __init__(self, file_queue):
+        self.file_queue = file_queue
+
+    async def start(self):
+        while True:
+            piece = await self.file_queue.get()
+
+            if not piece: # Poison pill
+                return
+
+            await self.save(piece)
+</code></pre></div></div></section><section data-id="172c019e327af5bb98dea2614c0401fc">
+<div class="sl-block" data-block-type="text" style="width: 661px; left: 150px; top: 11px; height: auto;" data-block-id="7e2204a0c3c9e3af6e1e336ce066d278"><div class="sl-block-content" data-placeholder-tag="h2" data-placeholder-text="Title Text" style="z-index: 11; text-align: left;" dir="ui">
+<h2>Check it out on Github</h2>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 813px; left: 74px; top: 292px;" data-block-id="bcac53ce438d9ad67755f48632e1c61a"><div class="sl-block-style" style="z-index: 12; transform: rotate(360deg);"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 12; font-size: 150%;">
+<p>https://github.com/SimplyAhmazing/pygotham-bittorrent</p>
+</div></div></div></section><section data-id="9b27f55ea6a358aa3269b150e55e21bf">
+<div class="sl-block" data-block-type="text" style="width: 780px; left: 144px; top: -4px; height: auto;" data-block-id="bc38ac699a33d4e2482ee32774b4aba8"><div class="sl-block-content" data-placeholder-tag="h2" data-placeholder-text="Title Text" style="z-index: 11; text-align: left;" dir="ui">
+<h2>Some Bittorrent Projects</h2>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 663px; left: 203px; top: 187px;" data-block-id="b262b2c0f27c97411f3f94483c25f23a"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 12;">
+<ul>
+	<li>Support UDP tracker</li>
+	<li>Support sharing of multiple files</li>
+	<li>Discover Peers without a tracker
+	<ul>
+		<li>Peer Exchange Protocol (PEX)</li>
+		<li>Distributed Hash Table (DHT)</li>
+	</ul>
+	</li>
+	<li>Download Magnet Links</li>
+	<li>Improve download strategy</li>
+	<li>Play torrent videos as they're downloading</li>
+</ul>
+</div></div></section><section data-id="5cdfda29a7011dacf15b665b95f232dc">
+<div class="sl-block" data-block-type="text" style="width: 780px; left: 90px; top: 0px; height: auto;" data-block-id="24ad540f0ccd58f2a8075ea6ab5d79a8"><div class="sl-block-content" data-placeholder-tag="h2" data-placeholder-text="Title Text" style="z-index: 11; text-align: left;" dir="ui">
+<h2>Learn more about asyncio</h2>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 642px; left: 14px; top: 183px;" data-block-id="475fc2abb7c98e0dd3b3c76d44d7f458"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 12;">
+<p><strong>500 Lines or Less</strong></p>
+
+<p><strong>A Web Crawler With asyncio Coroutines</strong></p>
+
+<p>by: Jesse Jiryu Davis &amp; Guido van Rossum</p>
+</div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 208px; height: 208px; left: 687px; top: 435px;" data-block-id="4635e775875154d4451ce830770ced93"><div class="sl-block-content" style="z-index: 13;"><img style="" data-natural-width="1350" data-natural-height="1350" data-lazy-loaded="" data-src="creating-a-bittorrent-client-with-asyncio/4b69e2a506cc3df1af1dbd71b1d94bb9.png"></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 659px; left: 14px; top: 490px;" data-block-id="ba1b2caeae6029d05a39179d214fa2ac"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 14;">
+<p><strong>Home Assistant</strong></p>
+
+<p>github.com/home-assistant/home-assistant</p>
+</div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 195px; height: 251px; left: 693px; top: 123px;" data-block-id="39a21e7951d2297aa2887a5f005ab667"><div class="sl-block-content" style="z-index: 15;"><img style="" data-natural-width="482" data-natural-height="622" data-lazy-loaded="" data-src="creating-a-bittorrent-client-with-asyncio/2ce5806b7ebd4d4283c0d99af3593499.png"></div></div></section><section data-id="6e4353835f46f975113ba10be07616a8"><div class="sl-block" data-block-type="text" style="width: 920px; left: 20px; top: 161px; height: auto;" data-block-id="f7c8ecc3987308be63d529041ea3458d"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 11;">
+<h1>await TalkFinished('bye')</h1>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 243px; left: 421px; top: 381px;" data-block-id="1cb20933065b912522e45531b5f1838d"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 12;">
+<p>SimplyAhmazing</p>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 251px; left: 417px; top: 503px;" data-block-id="c94c0cc912819ebb95b93c0f8a548405"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 13;">
+<p>SimplyAhmaz1ng</p>
+</div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 113px; height: 113px; left: 300px; top: 466px;" data-block-id="929e08ee4c8b0f84d6ce9499291ba818"><div class="sl-block-content" style="z-index: 14;"><img style="" data-natural-width="400" data-natural-height="400" data-src="creating-a-bittorrent-client-with-asyncio/52b4b1f98c4ef5e85b9551dfbf4d0730.png"></div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 30px; min-height: 30px; width: 87px; height: 87px; left: 313px; top: 350px;" data-block-id="7826424d4d6dca14a27a041bfddeb373"><div class="sl-block-content" style="z-index: 15;"><img style="" data-natural-width="120" data-natural-height="120" data-src="creating-a-bittorrent-client-with-asyncio/5ac8c6052de53e7643351e22e46970d1.png"></div></div></section>
+			</div>
+		</div>
+
+		<script>
+			var SLConfig = {"deck": {"id":1080268,"slug":"creating-a-bittorrent-client-with-asyncio","title":"Creating a Bittorrent Client with Asyncio","description":"","width":960,"height":700,"visibility":"all","published_at":"2017-09-26T00:12:09.667Z","sanitize_messages":null,"thumbnail_url":"https://s3.amazonaws.com/media-p.slid.es/thumbnails/c1d113a75c6d9a52fd1700ccd77136e1/thumb.jpg?1506526739","view_count":5,"user":{"id":763395,"username":"simplyahmazing","name":"Simply Ahmazing","description":null,"thumbnail_url":"https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/photo.jpg?sz=50","paid":true,"pro":false,"lite":true,"team_id":null,"settings":{"id":614058,"present_controls":true,"present_upsizing":true,"present_pointer":false,"present_notes":true}},"background_transition":"slide","transition":"slide","theme_id":null,"theme_font":"montserrat","theme_color":"white-blue","auto_slide_interval":0,"comments_enabled":true,"forking_enabled":true,"rolling_links":false,"center":false,"should_loop":false,"share_notes":false,"slide_number":true,"rtl":false,"version":2,"collaborative":true,"deck_user_editor_limit":1,"data_updated_at":1507223818289,"font_typekit":null,"font_google":null,"notes":{"68f9397bccdf3c48ddec4c5f92407a27":"* Many networked events spend most of their time holding many open connections that are slow, with infrequent events.","8aee5a2a6f7514a92e91d9187a50c214":"allows you to download a file from multiple computers on the internet\n\ninstead of the classic client \u003c\u003e server architecture","7e88e4a23b9166e6280f61a7c55a8e55":"* one sensitivity to when writing asyncio code is \n\n* none of the code you write is blocking the event loop...","0bfcd7a9a2a18544304b528ddbaf3fbb":"Handshake is making sure we're talking about the same file"}}};
+
+
+			// Use local fonts
+			SLConfig.fonts_url = 'lib/fonts/';
+		</script>
+
+		<script src="lib/head.min.js"></script>
+		<script src="lib/reveal.min.js"></script>
+		<script src="lib/offline.js"></script>
+
+		<!-- Initialize the presentation -->
+		<script>
+			Reveal.initialize({
+				width: 960,
+				height: 700,
+				margin: 0.05,
+
+				controls: true,
+				progress: true,
+				history: true,
+				mouseWheel: false,
+				showNotes: false,
+				slideNumber: true,
+
+				autoSlide: 0 || 0,
+				autoSlideStoppable: true,
+
+				center: false,
+				loop: false,
+				rtl: false,
+
+				transition: "slide",
+				backgroundTransition: "slide",
+
+				dependencies: [
+					{ src: 'lib/reveal-plugins/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'lib/reveal-plugins/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'lib/reveal-plugins/highlight/highlight.js', async: true, callback: function() { hljs.initHighlighting(); hljs.initHighlightingOnLoad(); } },
+					{ src: 'lib/reveal-plugins/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+		</script>
+
+		
+
+	</body>
+</html>
