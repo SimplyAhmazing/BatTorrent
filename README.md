@@ -8,7 +8,7 @@ A Bitttorent Client written with Python's Asyncio. This code is optimized for le
 
 ## Notes from the author
 
-* A detailed write up in the form of a tutorial will be coming out to follow this project. Stay tuned by following me on [Twitter @ SimplyAhmaz1ng](twitter.com/simplyAhmaz1ng)
+* Detailed write-up coming soon. Following me on [Twitter @ SimplyAhmaz1ng](twitter.com/simplyAhmaz1ng) for updates.
 
 ## Development
 
