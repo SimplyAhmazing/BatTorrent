@@ -21,7 +21,6 @@ Run tests: `cd src && pytest`
 * [ ] Minor refactors to make code easier to follow,
     * [ ] Parse messages into objects
     * [ ] Use `async for` for iterating through messages
-    * [ ] Use `async for` for iterating through messages
     * [ ] Squash all `TODO`s
 * [ ] Show progress when running
 * [ ] More unit tests
