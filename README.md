@@ -27,4 +27,4 @@ Run tests: `cd src && pytest`
 * [ ] Show progress when running
 * [ ] More unit tests
 * [ ] Setup CI
-    
+* [ ] Setup mypy static type linter    
