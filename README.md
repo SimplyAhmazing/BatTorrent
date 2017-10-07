@@ -1,8 +1,9 @@
 <div align="center">
+  
   <a href="https://github.com/SimplyAhmazing/BatTorrent">
-    <img width="300" heigth="300" src="https://imgur.com/a/I85LJ">
+    <img width="200" heigth="200" src="https://imgur.com/a/I85LJ">
   </a>
-  <br>
+  <br><br>
    <h1>BatTorrent</h1>
 </div>
 
