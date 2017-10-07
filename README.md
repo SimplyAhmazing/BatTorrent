@@ -1,10 +1,11 @@
-<p align="center">
-   <img align="left" width="200" height="200" src="https://github.com/SimplyAhmazing/BatTorrent/blob/master/assets/batman-homer-bart.jpg?raw=true">
-</p>
-<br>
-
-# BatTorrent
-
+<div align="center">
+  <a href="https://github.com/webpack/webpack">
+    <img width="300" heigth="300" src="https://imgur.com/a/I85LJ">
+  </a>
+  <br>
+  <br>
+   <h1>BatTorrent</h1>
+</div>
 
 A Bitttorent Client written with Python's Asyncio. This code is optimized for learning, do not ship it to production.
 
