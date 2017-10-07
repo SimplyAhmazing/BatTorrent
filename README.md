@@ -1,9 +1,8 @@
 <div align="center">
-    <img width="200" heigth="200" src="https://imgur.com/a/I85LJ" />
+    <img width="200" heigth="200" src="https://i.imgur.com/pFy8mka.jpg">
+    <br><br>
+    <h1>BatTorrent
 </div>
-
-
-[Imgur](https://i.imgur.com/pFy8mka.jpg?1)
 
 A Bitttorent Client written with Python's Asyncio. This code is optimized for learning, do not ship it to production.
 
