@@ -1,8 +1,6 @@
-# A Bitttorent Client written with Python's Asyncio
+# BatTorrent
 
-## Production Notes
-
-Do not ship this code. This code is optimized for learning.
+A Bitttorent Client written with Python's Asyncio. This code is optimized for learning, do not ship it to production.
 
 ## Notes from the author
 
