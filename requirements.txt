@@ -14,7 +14,7 @@ pydocstyle==2.0.0
 pyflakes==1.6.0
 pylama==7.4.1
 pytest==3.2.1
-requests==2.18.4
+requests==2.20.0
 six==1.10.0
 snowballstemmer==1.2.1
 urllib3==1.22
